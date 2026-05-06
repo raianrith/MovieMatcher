@@ -31,10 +31,9 @@ export function AppHeader() {
   }, []);
 
   return (
-    <header className="pt-[env(safe-area-inset-top)]">
-      <div className="border-b border-[rgba(232,200,106,0.10)] bg-[#0c0a12]/70 backdrop-blur-xl">
-        {/* Reserve space on the right so content doesn't sit under the fixed gear button. */}
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 pr-[calc(4rem+env(safe-area-inset-right))] md:gap-6 md:pr-4">
+    <header className="sticky top-0 z-40">
+      <div className="border-b border-[rgba(232,200,106,0.12)] bg-[#0c0a12]/92 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:gap-6">
           <Link
             href="/dashboard"
             className="shrink-0 font-[family-name:var(--font-display)] text-2xl tracking-[0.06em] text-white"
@@ -80,23 +79,22 @@ export function AppHeader() {
               </Link>
             ))}
           </nav>
+
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            className={cn(
+              "grid min-h-[44px] min-w-[44px] shrink-0 place-items-center rounded-xl",
+              "border border-[rgba(232,200,106,0.18)] px-3 text-[var(--cinema-muted-gold)] transition-colors",
+              "hover:border-[rgba(232,200,106,0.35)] hover:bg-[rgba(232,200,106,0.06)]",
+            )}
+          >
+            <span className="text-[18px]" aria-hidden>
+              ⚙
+            </span>
+          </Link>
         </div>
       </div>
-
-      <Link
-        href="/settings"
-        aria-label="Settings"
-        className={cn(
-          "fixed right-4 z-50 grid min-h-[46px] min-w-[46px] place-items-center rounded-2xl",
-          "top-[calc(env(safe-area-inset-top)+0.75rem)]",
-          "border border-[rgba(232,200,106,0.18)] bg-[#0c0a12]/70 text-[var(--cinema-muted-gold)] backdrop-blur-xl",
-          "shadow-[0_10px_30px_rgba(0,0,0,0.55)] hover:border-[rgba(232,200,106,0.35)] hover:bg-[rgba(232,200,106,0.06)]",
-        )}
-      >
-        <span className="text-[18px]" aria-hidden>
-          ⚙
-        </span>
-      </Link>
     </header>
   );
 }
