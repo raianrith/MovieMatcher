@@ -92,6 +92,59 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      <section className="panel-ticket p-6">
+        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--cinema-muted-gold)] opacity-95">
+          Download the app
+        </p>
+        <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl tracking-[0.04em] text-white">
+          INSTALL MOVIEMATCH
+        </h2>
+        <p className="mt-2 text-[13px] text-slate-400">
+          MovieMatch is a web app you can install on your phone like a native app (no App Store needed).
+        </p>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] p-4">
+            <p className="text-[12px] font-semibold text-slate-200">iPhone (iOS)</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[13px] text-slate-400">
+              <li>Open MovieMatch in Safari</li>
+              <li>Tap Share</li>
+              <li>Tap “Add to Home Screen”</li>
+              <li>Tap Add</li>
+            </ol>
+          </div>
+          <div className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] p-4">
+            <p className="text-[12px] font-semibold text-slate-200">Android</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[13px] text-slate-400">
+              <li>Open MovieMatch in Chrome</li>
+              <li>Tap the ⋮ menu</li>
+              <li>Tap “Install app”</li>
+            </ol>
+          </div>
+          <div className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] p-4">
+            <p className="text-[12px] font-semibold text-slate-200">Desktop</p>
+            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[13px] text-slate-400">
+              <li>Open MovieMatch in Chrome / Edge</li>
+              <li>Click the install icon in the address bar</li>
+              <li>Confirm Install</li>
+            </ol>
+          </div>
+        </div>
+
+        <details className="mt-4 rounded-xl border border-[rgba(232,200,106,0.12)] bg-[rgba(12,10,18,0.45)] px-4 py-3">
+          <summary className="cursor-pointer text-[13px] font-semibold text-slate-200">
+            Don’t see “Install”?
+          </summary>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-slate-400">
+            <li>Make sure you’re on the live HTTPS site (not localhost).</li>
+            <li>On iPhone, it must be Safari (not Chrome).</li>
+            <li>
+              If it still doesn’t show up, clear site data once and reload.
+            </li>
+          </ul>
+        </details>
+      </section>
+
       {profile ? (
         <p className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] px-5 py-4 text-center text-[13px] text-slate-400">
           Logged in as{" "}
