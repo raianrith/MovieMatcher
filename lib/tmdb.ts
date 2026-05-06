@@ -42,6 +42,7 @@ interface TmdbMovieDetail {
   poster_path: string | null;
   release_date?: string;
   original_language?: string;
+  production_countries?: { iso_3166_1: string }[];
   spoken_languages?: { english_name?: string; name?: string }[];
   credits?: {
     crew: { job: string; name: string }[];
@@ -75,6 +76,7 @@ export async function fetchMovieSnapshot(tmdbId: number): Promise<MovieSnapshot>
     releaseYear: Number.isFinite(year) ? year : 0,
     genres: data.genres?.map((g) => g.name) ?? [],
     original_language: data.original_language,
+    originCountries: data.production_countries?.map((c) => c.iso_3166_1).filter(Boolean) ?? [],
     languageLabel,
     runtimeMinutes: data.runtime,
     rating: Number(data.vote_average.toFixed(1)),
@@ -103,6 +105,8 @@ export async function discoverPopularIds(opts: {
   want: number;
   maxPages?: number;
   startPage?: number;
+  originCountry?: string;
+  originalLanguage?: string;
 }): Promise<number[]> {
   const out: number[] = [];
   const maxPages = opts.maxPages ?? 8;
@@ -114,6 +118,8 @@ export async function discoverPopularIds(opts: {
       sort_by: "popularity.desc",
       vote_count_gte: "80",
       include_adult: "false",
+      ...(opts.originCountry ? { with_origin_country: opts.originCountry } : {}),
+      ...(opts.originalLanguage ? { with_original_language: opts.originalLanguage } : {}),
     })) as DiscoverPayload;
 
     for (const r of data.results) {

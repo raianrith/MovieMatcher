@@ -1,6 +1,8 @@
 /** Swipe payload stored in Postgres + snapshots in JSON */
 export type SwipeActionDb = "liked" | "disliked" | "skipped";
 
+export type CinemaFilter = "all" | "hollywood" | "india" | "bollywood";
+
 /** Normalized TMDB-derived payload stored in JSONB */
 export interface MovieSnapshot {
   tmdb_movie_id: number;
@@ -8,6 +10,8 @@ export interface MovieSnapshot {
   releaseYear: number;
   genres: string[];
   original_language?: string;
+  /** ISO-3166-1 country codes (e.g. ["US"], ["IN"]) */
+  originCountries?: string[];
   languageLabel: string;
   runtimeMinutes: number | null;
   rating: number;

@@ -61,6 +61,9 @@ export async function fetchMatchesEnriched(params: {
       releaseYear: typeof msAny?.releaseYear === "number" ? msAny.releaseYear : 0,
       genres: Array.isArray(msAny?.genres) ? (msAny!.genres.filter((g) => typeof g === "string") as string[]) : [],
       original_language: typeof msAny?.original_language === "string" ? msAny.original_language : undefined,
+      originCountries: Array.isArray(msAny?.originCountries)
+        ? (msAny!.originCountries.filter((c) => typeof c === "string") as string[])
+        : [],
       languageLabel: typeof msAny?.languageLabel === "string" ? msAny.languageLabel : "",
       runtimeMinutes: typeof msAny?.runtimeMinutes === "number" ? msAny.runtimeMinutes : null,
       rating: typeof msAny?.rating === "number" ? msAny.rating : 0,

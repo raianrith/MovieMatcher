@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useDrag } from "@use-gesture/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { MovieSnapshot, SwipeActionDb } from "@/lib/types";
+import type { CinemaFilter, MovieSnapshot, SwipeActionDb } from "@/lib/types";
 import { cn } from "@/lib/cn";
 import { createClient } from "@/lib/supabaseClient";
 import { recordSwipe } from "@/lib/swipes";
@@ -32,6 +32,7 @@ export function SwipeDeck() {
   const [error, setError] = useState<string | null>(null);
   const [busyIdx, setBusyIdx] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
+  const [cinema, setCinema] = useState<CinemaFilter>("all");
 
   useEffect(() => {
     void createClient()
@@ -43,7 +44,7 @@ export function SwipeDeck() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/movies/feed");
+      const res = await fetch(`/api/movies/feed?cinema=${encodeURIComponent(cinema)}`);
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to load movies");
       setMovies(json.movies ?? []);
@@ -54,7 +55,7 @@ export function SwipeDeck() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [cinema]);
 
   useEffect(() => {
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- client fetch after mount */
@@ -192,6 +193,21 @@ export function SwipeDeck() {
 
   return (
     <div className="relative mx-auto flex w-full max-w-md flex-col pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pb-10">
+      <div className="mb-4 panel-ticket p-4">
+        <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
+          Cinema
+          <select
+            value={cinema}
+            onChange={(e) => setCinema(e.target.value as CinemaFilter)}
+            className="field-cinema min-h-[48px] bg-[rgba(5,4,10,0.9)]"
+          >
+            <option value="all">All</option>
+            <option value="hollywood">Hollywood</option>
+            <option value="india">Indian cinema</option>
+            <option value="bollywood">Bollywood (Hindi)</option>
+          </select>
+        </label>
+      </div>
       <div
         {...bind()}
         ref={cardRef}

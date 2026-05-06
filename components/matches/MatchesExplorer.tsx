@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageHeading } from "@/components/layout/PageHeading";
-import type { MatchesSort, MatchWithFriend } from "@/lib/types";
+import type { CinemaFilter, MatchesSort, MatchWithFriend } from "@/lib/types";
 import { createClient } from "@/lib/supabaseClient";
 import { getFriends } from "@/lib/friends";
 import { fetchMatchesEnriched, upsertMatchUserState } from "@/lib/matches";
@@ -42,6 +42,7 @@ export function MatchesExplorer() {
   const [friendFilter, setFriendFilter] = useState<string>("");
   const [titleSearch, setTitleSearch] = useState("");
   const [genreFilter, setGenreFilter] = useState("");
+  const [cinema, setCinema] = useState<CinemaFilter>("all");
   const [sort, setSort] = useState<MatchesSort>("recent");
   const [buddyList, setBuddyList] = useState<Array<{ id: string; username: string }>>([]);
   const [watchByMovie, setWatchByMovie] = useState<Record<number, WatchProvidersResponse | null>>({});
@@ -65,6 +66,16 @@ export function MatchesExplorer() {
     return () => ac.abort();
   }, [supabase]);
 
+  const matchCinema = useCallback((c: CinemaFilter, m: MatchWithFriend) => {
+    if (c === "all") return true;
+    const countries = Array.isArray(m.movie_snapshot?.originCountries) ? m.movie_snapshot.originCountries : [];
+    const lang = m.movie_snapshot?.original_language ?? "";
+    if (c === "hollywood") return countries.includes("US");
+    if (c === "india") return countries.includes("IN");
+    if (c === "bollywood") return countries.includes("IN") && lang === "hi";
+    return true;
+  }, []);
+
   const load = useCallback(async () => {
     const uid = (await supabase.auth.getUser()).data.user?.id;
     setMe(uid ?? null);
@@ -79,13 +90,13 @@ export function MatchesExplorer() {
         genre: genreFilter || undefined,
         sort,
       });
-      setRows(data);
+      setRows(data.filter((m) => matchCinema(cinema, m)));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load matches");
     } finally {
       setLoading(false);
     }
-  }, [supabase, friendFilter, titleSearch, genreFilter, sort]);
+  }, [supabase, friendFilter, titleSearch, genreFilter, sort, cinema, matchCinema]);
 
   useEffect(() => {
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- client fetch after mount */
@@ -182,6 +193,15 @@ export function MatchesExplorer() {
               {g}
             </option>
           ))}
+        </select>
+      </label>
+      <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
+        Cinema
+        <select value={cinema} onChange={(e) => setCinema(e.target.value as CinemaFilter)} className={selectClass}>
+          <option value="all">All</option>
+          <option value="hollywood">Hollywood</option>
+          <option value="india">Indian cinema</option>
+          <option value="bollywood">Bollywood (Hindi)</option>
         </select>
       </label>
       <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
