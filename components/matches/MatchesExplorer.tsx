@@ -271,52 +271,7 @@ export function MatchesExplorer() {
                       {Array.isArray(snapshot.actors) ? snapshot.actors.join(", ") : ""}
                     </p>
 
-                    <div className="space-y-4 border-t border-[rgba(148,134,170,0.12)] pt-5">
-                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                        Matches on this film ({bucket.length})
-                      </p>
-                      <ul className="space-y-3">
-                        {bucket.map((m) => (
-                          <li
-                            key={m.id}
-                            className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,7,14,0.55)] p-4"
-                          >
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-[var(--cinema-teal-dim)] px-3 py-1.5 text-[12px] font-bold text-[var(--cinema-teal)]">
-                                @{m.friendUsername ?? "?"}
-                              </span>
-                              <span className="text-[12px] text-slate-600">
-                                {formatDateTime(m.created_at)}
-                              </span>
-                            </div>
-                            <div className="mt-4 flex flex-wrap gap-3">
-                              <button
-                                type="button"
-                                onClick={() => void toggleWatch(m.id, !m.in_watchlist)}
-                                className={`min-h-[44px] rounded-xl px-5 text-[12px] font-bold ${
-                                  m.in_watchlist
-                                    ? "bg-[var(--cinema-muted-gold)] text-[#0a0810]"
-                                    : "border border-[rgba(232,200,106,0.35)] text-[var(--cinema-muted-gold)]"
-                                }`}
-                              >
-                                {m.in_watchlist ? "In watch queue" : "Queue for later"}
-                              </button>
-                              <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-[13px] font-semibold text-slate-300">
-                                <input
-                                  type="checkbox"
-                                  className="h-5 w-5 rounded border-slate-600 accent-[var(--cinema-teal)]"
-                                  checked={m.watched}
-                                  onChange={(e) => void toggleWatched(m.id, e.target.checked)}
-                                />
-                                Watched together
-                              </label>
-                            </div>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="space-y-3 border-t border-[rgba(148,134,170,0.12)] pt-5">
+                    <div className="space-y-3">
                       <div className="flex flex-wrap items-center justify-between gap-3">
                         <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
                           Where to watch
@@ -384,6 +339,52 @@ export function MatchesExplorer() {
                         <p className="text-[13px] text-slate-500">Tap “Show” to fetch providers (US).</p>
                       )}
                     </div>
+
+                    <div className="space-y-4 border-t border-[rgba(148,134,170,0.12)] pt-5">
+                      <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                        Matches on this film ({bucket.length})
+                      </p>
+                      <ul className="space-y-3">
+                        {bucket.map((m) => (
+                          <li
+                            key={m.id}
+                            className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,7,14,0.55)] p-4"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="rounded-full bg-[var(--cinema-teal-dim)] px-3 py-1.5 text-[12px] font-bold text-[var(--cinema-teal)]">
+                                @{m.friendUsername ?? "?"}
+                              </span>
+                              <span className="text-[12px] text-slate-600">
+                                {formatDateTime(m.created_at)}
+                              </span>
+                            </div>
+                            <div className="mt-4 flex flex-wrap gap-3">
+                              <button
+                                type="button"
+                                onClick={() => void toggleWatch(m.id, !m.in_watchlist)}
+                                className={`min-h-[44px] rounded-xl px-5 text-[12px] font-bold ${
+                                  m.in_watchlist
+                                    ? "bg-[var(--cinema-muted-gold)] text-[#0a0810]"
+                                    : "border border-[rgba(232,200,106,0.35)] text-[var(--cinema-muted-gold)]"
+                                }`}
+                              >
+                                {m.in_watchlist ? "In watch queue" : "Queue for later"}
+                              </button>
+                              <label className="flex min-h-[44px] cursor-pointer items-center gap-2 text-[13px] font-semibold text-slate-300">
+                                <input
+                                  type="checkbox"
+                                  className="h-5 w-5 rounded border-slate-600 accent-[var(--cinema-teal)]"
+                                  checked={m.watched}
+                                  onChange={(e) => void toggleWatched(m.id, e.target.checked)}
+                                />
+                                Watched together
+                              </label>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
                   </div>
                 </div>
               </li>
