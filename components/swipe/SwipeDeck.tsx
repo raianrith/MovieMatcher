@@ -195,7 +195,7 @@ export function SwipeDeck() {
     <div className="relative mx-auto flex w-full max-w-md flex-col pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pb-10">
       <div className="mb-4 panel-ticket p-4">
         <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
-          Cinema
+          Filter by Region
           <select
             value={cinema}
             onChange={(e) => setCinema(e.target.value as CinemaFilter)}

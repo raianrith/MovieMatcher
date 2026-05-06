@@ -201,7 +201,7 @@ export function MatchesExplorer() {
         </select>
       </label>
       <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
-        Cinema
+        Filter by Region
         <select value={cinema} onChange={(e) => setCinema(e.target.value as CinemaFilter)} className={selectClass}>
           <option value="all">All</option>
           <option value="hollywood">Hollywood (US)</option>
