@@ -53,7 +53,22 @@ export async function fetchMatchesEnriched(params: {
   let out: MatchWithFriend[] = rows.map((row) => {
     const fid = friendForRow(row, userId)!;
     const p = profilesById[fid];
-    const ms = row.movie_snapshot as unknown as MovieSnapshot;
+    const msAny = row.movie_snapshot as unknown as Partial<MovieSnapshot> | null | undefined;
+    // Normalize malformed legacy rows so the client UI never crashes on missing fields.
+    const ms: MovieSnapshot = {
+      tmdb_movie_id: typeof msAny?.tmdb_movie_id === "number" ? msAny.tmdb_movie_id : row.tmdb_movie_id,
+      title: typeof msAny?.title === "string" ? msAny.title : "",
+      releaseYear: typeof msAny?.releaseYear === "number" ? msAny.releaseYear : 0,
+      genres: Array.isArray(msAny?.genres) ? (msAny!.genres.filter((g) => typeof g === "string") as string[]) : [],
+      original_language: typeof msAny?.original_language === "string" ? msAny.original_language : undefined,
+      languageLabel: typeof msAny?.languageLabel === "string" ? msAny.languageLabel : "",
+      runtimeMinutes: typeof msAny?.runtimeMinutes === "number" ? msAny.runtimeMinutes : null,
+      rating: typeof msAny?.rating === "number" ? msAny.rating : 0,
+      overview: typeof msAny?.overview === "string" ? msAny.overview : "",
+      director: typeof msAny?.director === "string" ? msAny.director : "",
+      actors: Array.isArray(msAny?.actors) ? (msAny!.actors.filter((a) => typeof a === "string") as string[]) : [],
+      posterUrl: typeof msAny?.posterUrl === "string" ? msAny.posterUrl : null,
+    };
     const st = stateByMatch[row.id];
 
     return {
@@ -73,12 +88,12 @@ export async function fetchMatchesEnriched(params: {
 
   if (titleSearch?.trim()) {
     const lower = titleSearch.trim().toLowerCase();
-    out = out.filter((m) => m.movie_snapshot.title.toLowerCase().includes(lower));
+    out = out.filter((m) => (m.movie_snapshot.title ?? "").toLowerCase().includes(lower));
   }
 
   if (genre) {
     out = out.filter((m) =>
-      (m.movie_snapshot.genres ?? []).some((g) => g.toLowerCase() === genre.toLowerCase()),
+      (m.movie_snapshot.genres ?? []).some((g) => String(g).toLowerCase() === genre.toLowerCase()),
     );
   }
 
