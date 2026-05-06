@@ -1,34 +1,10 @@
-"use client";
-
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { createClient } from "@/lib/supabaseClient";
-import { toast } from "sonner";
+import { signInAction } from "@/app/(auth)/actions";
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const onSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const supabase = createClient();
-      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
-      if (error) throw error;
-      toast.success("Welcome back!");
-      router.push("/dashboard");
-      router.refresh();
-    } catch (err: unknown) {
-      toast.error(err instanceof Error ? err.message : "Sign-in failed");
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default async function LoginPage(props: { searchParams?: Promise<Record<string, string | string[] | undefined>> }) {
+  const searchParams = (await props.searchParams) ?? {};
+  const error = typeof searchParams.error === "string" ? searchParams.error : undefined;
+  const notice = typeof searchParams.notice === "string" ? searchParams.notice : undefined;
   return (
     <div className="panel-ticket relative w-full max-w-sm overflow-hidden p-8 sm:p-9">
       <div
@@ -37,7 +13,17 @@ export default function LoginPage() {
       />
       <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-[0.05em] text-white">SIGN IN</h1>
       <p className="mt-3 text-[15px] text-slate-400">Same email &amp; password you used at the door.</p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-5">
+      {notice ? (
+        <p className="mt-6 rounded-xl border border-[rgba(61,212,192,0.22)] bg-[rgba(61,212,192,0.08)] px-4 py-3 text-[13px] text-slate-200">
+          {notice}
+        </p>
+      ) : null}
+      {error ? (
+        <p className="mt-6 rounded-xl border border-[rgba(180,74,92,0.3)] bg-[rgba(40,14,22,0.35)] px-4 py-3 text-[13px] text-rose-100">
+          {error}
+        </p>
+      ) : null}
+      <form action={signInAction} className="mt-8 space-y-5">
         <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
           Email
           <input
@@ -45,8 +31,7 @@ export default function LoginPage() {
             autoComplete="email"
             inputMode="email"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            name="email"
             className="field-cinema mt-2 block w-full"
           />
         </label>
@@ -56,17 +41,15 @@ export default function LoginPage() {
             type="password"
             autoComplete="current-password"
             required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            name="password"
             className="field-cinema mt-2 block w-full"
           />
         </label>
         <button
-          disabled={loading}
           type="submit"
-          className="btn-spotlight w-full px-6 py-4 text-[16px] disabled:cursor-not-allowed disabled:opacity-45"
+          className="btn-spotlight w-full px-6 py-4 text-[16px]"
         >
-          {loading ? "Opening curtain…" : "Enter lobby"}
+          Enter lobby
         </button>
       </form>
       <p className="mt-10 text-center text-[15px] text-slate-500">
