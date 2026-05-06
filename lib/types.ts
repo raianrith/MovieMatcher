@@ -1,7 +1,16 @@
 /** Swipe payload stored in Postgres + snapshots in JSON */
 export type SwipeActionDb = "liked" | "disliked" | "skipped";
 
-export type CinemaFilter = "all" | "hollywood" | "india" | "bollywood";
+export type CinemaFilter =
+  | "all"
+  | "hollywood"
+  | "india"
+  | "bollywood"
+  | "tamil"
+  | "telugu"
+  | "malayalam"
+  | "kannada"
+  | "bengali";
 
 /** Normalized TMDB-derived payload stored in JSONB */
 export interface MovieSnapshot {

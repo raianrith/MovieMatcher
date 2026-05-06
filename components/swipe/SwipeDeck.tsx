@@ -202,9 +202,14 @@ export function SwipeDeck() {
             className="field-cinema min-h-[48px] bg-[rgba(5,4,10,0.9)]"
           >
             <option value="all">All</option>
-            <option value="hollywood">Hollywood</option>
-            <option value="india">Indian cinema</option>
+            <option value="hollywood">Hollywood (US)</option>
+            <option value="india">India (all languages)</option>
             <option value="bollywood">Bollywood (Hindi)</option>
+            <option value="tamil">Kollywood (Tamil)</option>
+            <option value="telugu">Tollywood (Telugu)</option>
+            <option value="malayalam">Mollywood (Malayalam)</option>
+            <option value="kannada">Sandalwood (Kannada)</option>
+            <option value="bengali">Bengali cinema</option>
           </select>
         </label>
       </div>

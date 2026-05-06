@@ -73,6 +73,11 @@ export function MatchesExplorer() {
     if (c === "hollywood") return countries.includes("US");
     if (c === "india") return countries.includes("IN");
     if (c === "bollywood") return countries.includes("IN") && lang === "hi";
+    if (c === "tamil") return countries.includes("IN") && lang === "ta";
+    if (c === "telugu") return countries.includes("IN") && lang === "te";
+    if (c === "malayalam") return countries.includes("IN") && lang === "ml";
+    if (c === "kannada") return countries.includes("IN") && lang === "kn";
+    if (c === "bengali") return countries.includes("IN") && lang === "bn";
     return true;
   }, []);
 
@@ -199,9 +204,14 @@ export function MatchesExplorer() {
         Cinema
         <select value={cinema} onChange={(e) => setCinema(e.target.value as CinemaFilter)} className={selectClass}>
           <option value="all">All</option>
-          <option value="hollywood">Hollywood</option>
-          <option value="india">Indian cinema</option>
+          <option value="hollywood">Hollywood (US)</option>
+          <option value="india">India (all languages)</option>
           <option value="bollywood">Bollywood (Hindi)</option>
+          <option value="tamil">Kollywood (Tamil)</option>
+          <option value="telugu">Tollywood (Telugu)</option>
+          <option value="malayalam">Mollywood (Malayalam)</option>
+          <option value="kannada">Sandalwood (Kannada)</option>
+          <option value="bengali">Bengali cinema</option>
         </select>
       </label>
       <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">

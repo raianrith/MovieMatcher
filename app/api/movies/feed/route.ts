@@ -12,6 +12,16 @@ function mapCinemaToDiscover(c: CinemaFilter | null) {
       return { originCountry: "IN" };
     case "bollywood":
       return { originCountry: "IN", originalLanguage: "hi" };
+    case "tamil":
+      return { originCountry: "IN", originalLanguage: "ta" };
+    case "telugu":
+      return { originCountry: "IN", originalLanguage: "te" };
+    case "malayalam":
+      return { originCountry: "IN", originalLanguage: "ml" };
+    case "kannada":
+      return { originCountry: "IN", originalLanguage: "kn" };
+    case "bengali":
+      return { originCountry: "IN", originalLanguage: "bn" };
     default:
       return {};
   }
