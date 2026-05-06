@@ -43,10 +43,18 @@ export async function fetchMatchesEnriched(params: {
   const { data: states } = matchIds.length
     ? await supabase
         .from("match_user_state")
-        .select("match_id, in_watchlist, watched")
+        .select("match_id, in_watchlist, watched, hidden, user_rating")
         .eq("user_id", userId)
         .in("match_id", matchIds)
-    : { data: [] as { match_id: string; in_watchlist: boolean; watched: boolean }[] };
+    : {
+        data: [] as {
+          match_id: string;
+          in_watchlist: boolean;
+          watched: boolean;
+          hidden: boolean;
+          user_rating: number | null;
+        }[],
+      };
 
   const stateByMatch = Object.fromEntries((states ?? []).map((s) => [s.match_id, s]));
 
@@ -83,8 +91,13 @@ export async function fetchMatchesEnriched(params: {
       friendDisplayName: p?.display_name ?? null,
       in_watchlist: st?.in_watchlist ?? false,
       watched: st?.watched ?? false,
+      hidden: st?.hidden ?? false,
+      user_rating: st?.user_rating ?? null,
     };
   });
+
+  // Per-user removal hides rows from the list.
+  out = out.filter((m) => !m.hidden);
 
   if (friendFilterId) {
     out = out.filter((m) => m.friendId === friendFilterId);
@@ -129,7 +142,7 @@ export async function upsertMatchUserState(
   supabase: SupabaseClient,
   userId: string,
   matchId: string,
-  patch: { in_watchlist?: boolean; watched?: boolean },
+  patch: { in_watchlist?: boolean; watched?: boolean; hidden?: boolean; user_rating?: number | null },
 ) {
   const { error } = await supabase.from("match_user_state").upsert(
     {

@@ -163,6 +163,17 @@ export function MatchesExplorer() {
     }
   };
 
+  const removeForMe = async (matchIds: string[]) => {
+    if (!me) return;
+    try {
+      await Promise.all(matchIds.map((id) => upsertMatchUserState(supabase, me, id, { hidden: true })));
+      toast.success("Removed from your reel.");
+      void load();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not remove");
+    }
+  };
+
   const loadWatch = async (tmdbId: number, mediaType: "movie" | "tv") => {
     const key = `${mediaType}:${tmdbId}`;
     if (watchByKey[key] !== undefined || watchLoading[key]) return;
@@ -305,9 +316,18 @@ export function MatchesExplorer() {
                   </div>
                   <div className="min-w-0 flex-1 space-y-4 p-5 sm:py-6 sm:pl-8">
                     <div>
-                      <h2 className="font-[family-name:var(--font-display)] text-2xl leading-tight tracking-[0.04em] text-white sm:text-[1.75rem]">
-                        {snapshot.title}
-                      </h2>
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <h2 className="font-[family-name:var(--font-display)] text-2xl leading-tight tracking-[0.04em] text-white sm:text-[1.75rem]">
+                          {snapshot.title}
+                        </h2>
+                        <button
+                          type="button"
+                          onClick={() => void removeForMe(bucket.map((m) => m.id))}
+                          className="min-h-[36px] rounded-lg border border-[rgba(180,74,92,0.35)] bg-[rgba(40,14,22,0.25)] px-3 text-[12px] font-semibold text-rose-200 hover:bg-[rgba(40,14,22,0.4)]"
+                        >
+                          Remove
+                        </button>
+                      </div>
                       <p className="mt-2 text-[12px] text-[var(--cinema-muted-gold)]">
                         {snapshot.releaseYear || "—"} ·{" "}
                         {Array.isArray(snapshot.genres) ? snapshot.genres.join(" · ") : ""}

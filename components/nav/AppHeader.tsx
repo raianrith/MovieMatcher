@@ -5,6 +5,8 @@ const links = [
   { href: "/dashboard", label: "Lobby" },
   { href: "/swipe", label: "Now showing" },
   { href: "/matches", label: "Double features" },
+  { href: "/watched", label: "After credits" },
+  { href: "/groups", label: "Group match" },
   { href: "/friends", label: "Crew" },
   { href: "/requests", label: "Invites" },
   { href: "/profile", label: "Your seat" },

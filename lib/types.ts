@@ -71,6 +71,8 @@ export interface MatchWithFriend extends MatchRowDb {
   friendDisplayName: string | null;
   in_watchlist: boolean;
   watched: boolean;
+  hidden?: boolean;
+  user_rating?: number | null;
 }
 
 export type MatchesSort = "recent" | "rating" | "year";

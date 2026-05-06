@@ -62,3 +62,25 @@ export function IconSeat(props: SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+
+export function IconReel(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden {...props}>
+      <circle cx={9} cy={12} r={6.5} />
+      <path d="M15 12h6" strokeLinecap="round" />
+      <circle cx={7} cy={10} r={0.9} fill="currentColor" stroke="none" />
+      <circle cx={11} cy={10} r={0.9} fill="currentColor" stroke="none" />
+      <circle cx={7} cy={14} r={0.9} fill="currentColor" stroke="none" />
+      <circle cx={11} cy={14} r={0.9} fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function IconGroupBadge(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden {...props}>
+      <path d="M12 3.5 14.5 8l5 .7-3.7 3.6.9 5-4.7-2.5-4.7 2.5.9-5L4.5 8.7l5-.7L12 3.5Z" />
+      <path d="M7 20.5h10" strokeLinecap="round" />
+    </svg>
+  );
+}
