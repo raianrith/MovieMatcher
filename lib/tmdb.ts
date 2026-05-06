@@ -7,8 +7,12 @@ import type { MovieSnapshot } from "@/lib/types";
 const TMDB_BASE = "https://api.themoviedb.org/3";
 
 function key(): string {
-  const k = process.env.TMDB_API_KEY;
-  if (!k) throw new Error("TMDB_API_KEY is not set");
+  const k = process.env.TMDB_API_KEY?.trim();
+  if (!k) {
+    throw new Error(
+      "TMDB_API_KEY is not set. Add it to .env.local (local) or Vercel Project → Environment Variables (deploy), then restart the dev server."
+    );
+  }
   return k;
 }
 
