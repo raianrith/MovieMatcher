@@ -7,6 +7,8 @@ import type { MatchesSort, MatchWithFriend } from "@/lib/types";
 import { createClient } from "@/lib/supabaseClient";
 import { getFriends } from "@/lib/friends";
 import { fetchMatchesEnriched, upsertMatchUserState } from "@/lib/matches";
+import type { WatchProvidersResponse } from "@/lib/tmdb-watch";
+import { providerLogoUrl } from "@/lib/tmdb-watch";
 import { toast } from "sonner";
 
 function groupByMovie(rows: MatchWithFriend[]) {
@@ -42,6 +44,8 @@ export function MatchesExplorer() {
   const [genreFilter, setGenreFilter] = useState("");
   const [sort, setSort] = useState<MatchesSort>("recent");
   const [buddyList, setBuddyList] = useState<Array<{ id: string; username: string }>>([]);
+  const [watchByMovie, setWatchByMovie] = useState<Record<number, WatchProvidersResponse | null>>({});
+  const [watchLoading, setWatchLoading] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const ac = new AbortController();
@@ -130,6 +134,22 @@ export function MatchesExplorer() {
     }
   };
 
+  const loadWatch = async (tmdbId: number) => {
+    if (watchByMovie[tmdbId] !== undefined || watchLoading[tmdbId]) return;
+    setWatchLoading((m) => ({ ...m, [tmdbId]: true }));
+    try {
+      const res = await fetch(`/api/movies/${tmdbId}/watch?region=US`);
+      const json = (await res.json()) as { error?: string } & WatchProvidersResponse;
+      if (!res.ok) throw new Error(json.error ?? "Failed to load providers");
+      setWatchByMovie((m) => ({ ...m, [tmdbId]: json }));
+    } catch (e) {
+      setWatchByMovie((m) => ({ ...m, [tmdbId]: null }));
+      toast.error(e instanceof Error ? e.message : "Could not load where to watch");
+    } finally {
+      setWatchLoading((m) => ({ ...m, [tmdbId]: false }));
+    }
+  };
+
   const filterGrid = (
     <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
       <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
@@ -207,6 +227,7 @@ export function MatchesExplorer() {
           {grouped.map(([tmdbId, bucket]) => {
             const snapshot = bucket[0].movie_snapshot;
             const poster = snapshot.posterUrl;
+            const watch = watchByMovie[tmdbId];
             return (
               <li
                 key={tmdbId}
@@ -293,6 +314,75 @@ export function MatchesExplorer() {
                           </li>
                         ))}
                       </ul>
+                    </div>
+
+                    <div className="space-y-3 border-t border-[rgba(148,134,170,0.12)] pt-5">
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-slate-500">
+                          Where to watch
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => void loadWatch(tmdbId)}
+                          className="min-h-[36px] rounded-lg border border-[rgba(232,200,106,0.22)] px-3 text-[12px] font-semibold text-[var(--cinema-muted-gold)] hover:bg-[rgba(232,200,106,0.06)]"
+                        >
+                          {watchLoading[tmdbId] ? "Loading…" : watch ? "Refresh" : "Show"}
+                        </button>
+                      </div>
+
+                      {watch === null ? (
+                        <p className="text-[13px] text-slate-500">No provider info available for this region.</p>
+                      ) : watch ? (
+                        <div className="space-y-3">
+                          {(
+                            [
+                              ["Stream", watch.flatrate],
+                              ["Rent", watch.rent],
+                              ["Buy", watch.buy],
+                            ] as const
+                          ).map(([label, list]) =>
+                            list.length ? (
+                              <div key={label} className="space-y-2">
+                                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-slate-600">
+                                  {label}
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  {list.slice(0, 6).map((p) => (
+                                    <span
+                                      key={p.provider_id}
+                                      className="inline-flex items-center gap-2 rounded-full border border-[rgba(148,134,170,0.16)] bg-[rgba(8,7,14,0.55)] px-3 py-1.5 text-[12px] font-semibold text-slate-200"
+                                    >
+                                      {providerLogoUrl(p.logo_path) ? (
+                                        // eslint-disable-next-line @next/next/no-img-element -- tiny external logos
+                                        <img
+                                          src={providerLogoUrl(p.logo_path)!}
+                                          alt=""
+                                          width={18}
+                                          height={18}
+                                          className="rounded"
+                                        />
+                                      ) : null}
+                                      {p.provider_name}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : null,
+                          )}
+                          {watch.link ? (
+                            <a
+                              className="inline-flex min-h-[40px] items-center justify-center rounded-xl border border-[var(--cinema-teal)]/35 bg-[var(--cinema-teal-dim)] px-4 text-[13px] font-bold text-[var(--cinema-teal)]"
+                              href={watch.link}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open full watch list →
+                            </a>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <p className="text-[13px] text-slate-500">Tap “Show” to fetch providers (US).</p>
+                      )}
                     </div>
                   </div>
                 </div>
