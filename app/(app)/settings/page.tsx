@@ -1,11 +1,19 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { PageHeading } from "@/components/layout/PageHeading";
 import { createClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
+
+function isLikelyUrl(v: string) {
+  try {
+    const u = new URL(v);
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -68,8 +76,16 @@ export default function SettingsPage() {
         </p>
         <div className="mt-4 flex items-center gap-4">
           <div className="relative h-16 w-16 overflow-hidden rounded-full border border-[rgba(232,200,106,0.18)] bg-[rgba(8,6,14,0.55)]">
-            {avatarUrl.trim() ? (
-              <Image src={avatarUrl.trim()} alt="" fill sizes="64px" className="object-cover" draggable={false} />
+            {avatarUrl.trim() && isLikelyUrl(avatarUrl.trim()) ? (
+              // Use <img> to avoid Next/Image remote host allowlist issues for user-provided URLs.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={avatarUrl.trim()}
+                alt=""
+                className="h-full w-full object-cover"
+                draggable={false}
+                referrerPolicy="no-referrer"
+              />
             ) : (
               <div className="grid h-full w-full place-items-center text-[14px] font-bold text-[var(--cinema-muted-gold)]">
                 MM
@@ -77,12 +93,12 @@ export default function SettingsPage() {
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">
-              Image URL
+            <label className="flex flex-col gap-2">
+              <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500">Image URL</span>
               <input
                 value={avatarUrl}
                 onChange={(e) => setAvatarUrl(e.target.value)}
-                className="field-cinema min-h-[48px]"
+                className="field-cinema min-h-[48px] font-medium normal-case tracking-normal"
                 placeholder="https://…"
                 inputMode="url"
                 autoCapitalize="none"
@@ -109,7 +125,7 @@ export default function SettingsPage() {
           </button>
         </div>
         <p className="mt-3 text-[12px] text-slate-500">
-          Tip: use a square image for best results.
+          Tip: paste a direct image URL starting with <span className="font-semibold text-slate-300">https://</span>.
         </p>
       </section>
 

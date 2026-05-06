@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { PageHeading } from "@/components/layout/PageHeading";
@@ -13,7 +12,15 @@ function AvatarCircle(props: { url?: string | null; label: string }) {
   return (
     <div className="relative h-11 w-11 overflow-hidden rounded-full border border-[rgba(232,200,106,0.16)] bg-[rgba(8,6,14,0.55)]">
       {url ? (
-        <Image src={url} alt="" fill sizes="44px" className="object-cover" draggable={false} />
+        // Use <img> so user-provided avatar hosts work without Next/Image allowlisting.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={url}
+          alt=""
+          className="h-full w-full object-cover"
+          draggable={false}
+          referrerPolicy="no-referrer"
+        />
       ) : (
         <div className="grid h-full w-full place-items-center text-[12px] font-bold text-[var(--cinema-muted-gold)]">
           {label.slice(0, 1).toUpperCase()}
