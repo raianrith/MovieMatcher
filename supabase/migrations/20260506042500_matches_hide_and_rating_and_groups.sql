@@ -43,6 +43,7 @@ alter table public.friend_groups enable row level security;
 alter table public.friend_group_members enable row level security;
 
 -- groups: owner can do anything; members can read
+drop policy if exists fg_owner_all on public.friend_groups;
 create policy fg_owner_all
   on public.friend_groups
   for all
@@ -50,6 +51,7 @@ create policy fg_owner_all
   using (owner_id = auth.uid())
   with check (owner_id = auth.uid());
 
+drop policy if exists fg_member_read on public.friend_groups;
 create policy fg_member_read
   on public.friend_groups
   for select
@@ -62,6 +64,7 @@ create policy fg_member_read
   );
 
 -- members: owner can manage membership; members can read membership
+drop policy if exists fgm_owner_all on public.friend_group_members;
 create policy fgm_owner_all
   on public.friend_group_members
   for all
@@ -79,6 +82,7 @@ create policy fgm_owner_all
     )
   );
 
+drop policy if exists fgm_member_read on public.friend_group_members;
 create policy fgm_member_read
   on public.friend_group_members
   for select
