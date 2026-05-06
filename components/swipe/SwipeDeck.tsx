@@ -10,15 +10,18 @@ import { recordSwipe } from "@/lib/swipes";
 import { toast } from "sonner";
 
 const labels: Record<SwipeActionDb, string> = {
-  liked: "Liked!",
-  disliked: "Passed",
+  liked: "Added to your likes!",
+  disliked: "Not this time",
   skipped: "Skipped",
 };
 
-function mapGestureToAction(mx: number, last: boolean): SwipeActionDb | null {
+const SWIPE_DIST = 64;
+const SWIPE_VEL = 0.22;
+
+function mapGestureToAction(mx: number, vx: number, last: boolean): SwipeActionDb | null {
   if (!last) return null;
-  if (mx >= 90) return "liked";
-  if (mx <= -90) return "disliked";
+  if (mx >= SWIPE_DIST || vx > SWIPE_VEL) return "liked";
+  if (mx <= -SWIPE_DIST || vx < -SWIPE_VEL) return "disliked";
   return null;
 }
 
@@ -73,7 +76,7 @@ export function SwipeDeck() {
       if (nextIdx >= movies.length) {
         setBusyIdx(0);
         setMovies([]);
-        toast.info("Refreshing your discovery queue...");
+        toast.info("Rolling the next reel…");
         await loadMore();
       } else {
         setBusyIdx(nextIdx);
@@ -89,18 +92,42 @@ export function SwipeDeck() {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const bind = useDrag(
-    ({ movement: [mx], last, dragging }) => {
+    ({ movement: [mx], velocity: [vx], last, dragging }) => {
       const el = cardRef.current;
       if (!el || !movie) return;
       if (dragging) {
         el.style.translate = `${mx}px 0`;
-        el.style.opacity = `${1 - Math.min(Math.abs(mx) / 400, 0.15)}`;
+        el.style.opacity = `${1 - Math.min(Math.abs(mx) / 400, 0.18)}`;
         return;
       }
       if (!last) return;
-      const choice = mapGestureToAction(mx, true);
-      if (choice === "liked") void onDecision("liked");
-      else if (choice === "disliked") void onDecision("disliked");
+      const choice = mapGestureToAction(mx, vx, true);
+      if (choice === "liked") {
+        el.style.transition = "translate 0.22s ease, opacity 0.22s ease";
+        el.style.translate = "min(120vw, 480px) 0";
+        el.style.opacity = "0";
+        void onDecision("liked").finally(() => {
+          if (cardRef.current === el) {
+            el.style.transition = "";
+            el.style.translate = "0";
+            el.style.opacity = "1";
+          }
+        });
+        return;
+      }
+      if (choice === "disliked") {
+        el.style.transition = "translate 0.22s ease, opacity 0.22s ease";
+        el.style.translate = "max(-120vw, -480px) 0";
+        el.style.opacity = "0";
+        void onDecision("disliked").finally(() => {
+          if (cardRef.current === el) {
+            el.style.transition = "";
+            el.style.translate = "0";
+            el.style.opacity = "1";
+          }
+        });
+        return;
+      }
       el.style.transition = "opacity .15s ease, translate .18s ease";
       el.style.translate = "0";
       el.style.opacity = "1";
@@ -108,15 +135,21 @@ export function SwipeDeck() {
         el.style.transition = "";
       }, 220);
     },
-    { axis: "x", filterTaps: true, pointer: { touch: true } },
+    {
+      axis: "x",
+      filterTaps: true,
+      pointer: { touch: true },
+      preventScroll: true,
+    },
   );
 
   if (loading && !movies.length) {
     return (
-      <div className="flex min-h-[50vh] items-center justify-center text-slate-400">
+      <div className="flex min-h-[46vh] items-center justify-center text-slate-400">
         <div className="text-center">
-          <div className="mx-auto h-10 w-10 animate-spin rounded-full border-2 border-cyan-400 border-t-transparent" />
-          <p className="mt-4 text-sm">Loading discoveries from TMDB…</p>
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-2 border-[var(--cinema-teal)] border-t-transparent" />
+          <p className="mt-5 text-[15px] text-slate-300">Cueing posters from TMDB…</p>
+          <p className="mt-2 text-xs text-slate-600">This is the projector warming up.</p>
         </div>
       </div>
     );
@@ -124,12 +157,13 @@ export function SwipeDeck() {
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-500/40 bg-red-950/30 p-6 text-center text-red-200">
-        <p>{error}</p>
+      <div className="panel-ticket rounded-2xl border-[rgba(180,74,92,0.35)] bg-[rgba(40,14,22,0.45)] p-8 text-center">
+        <p className="font-medium text-rose-100">{error}</p>
+        <p className="mt-3 text-sm text-rose-200/70">Fix your connection or API key, then try again.</p>
         <button
           type="button"
           onClick={() => void loadMore()}
-          className="mt-4 rounded-xl bg-white/10 px-4 py-2 text-sm font-semibold text-white"
+          className="btn-spotlight mt-6 w-full max-w-xs px-6 py-3.5 text-sm"
         >
           Retry
         </button>
@@ -139,34 +173,49 @@ export function SwipeDeck() {
 
   if (!movie) {
     return (
-      <div className="rounded-3xl border border-slate-800 bg-slate-900/50 p-8 text-center text-slate-300">
-        Nothing left in this wave. Refresh to pull more picks.
+      <div className="panel-ticket-dashed p-10 text-center">
+        <p className="font-[family-name:var(--font-display)] text-2xl tracking-[0.06em] text-white">INTERMISSION</p>
+        <p className="mt-4 text-[15px] leading-relaxed text-slate-400">
+          No more titles in this batch. Load the next wave of discoveries.
+        </p>
         <button
           type="button"
           onClick={() => void loadMore()}
-          className="mt-6 w-full rounded-2xl bg-cyan-500 py-4 font-semibold text-slate-950"
+          className="btn-spotlight mt-8 w-full py-4 text-[16px]"
         >
-          Load more titles
+          Load more films
         </button>
       </div>
     );
   }
 
   return (
-    <div className="relative mx-auto flex w-full max-w-md flex-col pb-28">
+    <div className="relative mx-auto flex w-full max-w-md flex-col pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pb-10">
       <div
         {...bind()}
         ref={cardRef}
         key={movie.tmdb_movie_id}
-        className="touch-none rounded-3xl border border-slate-800 bg-slate-950/70 shadow-xl will-change-transform"
+        className={cn(
+          "touch-pan-y select-none overflow-hidden rounded-[1.25rem] border border-[rgba(232,200,106,0.18)]",
+          "bg-gradient-to-b from-[#1a1628]/95 to-[#0e0c16]/95 shadow-[0_24px_60px_rgba(0,0,0,0.55)] will-change-transform",
+        )}
       >
-        <div className="relative aspect-[2/3] w-full overflow-hidden rounded-t-3xl bg-slate-900">
+        <div
+          aria-hidden
+          className="flex h-2 w-full justify-center gap-1.5 border-b border-[rgba(232,200,106,0.08)] bg-[rgba(0,0,0,0.25)] py-1"
+        >
+          {Array.from({ length: 16 }).map((_, i) => (
+            <span key={i} className="h-1 w-1 rounded-full bg-[rgba(232,200,106,0.18)]" />
+          ))}
+        </div>
+        <div className="relative aspect-[2/3] w-full overflow-hidden bg-[#0a0810]">
           {movie.posterUrl ? (
             <Image
               src={movie.posterUrl}
               alt=""
               fill
-              className="object-cover"
+              draggable={false}
+              className="pointer-events-none object-cover"
               sizes="100vw"
               priority
               unoptimized={false}
@@ -174,46 +223,58 @@ export function SwipeDeck() {
           ) : (
             <div className="flex h-full items-center justify-center text-slate-600">No poster</div>
           )}
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0e0c16] to-transparent" />
         </div>
-        <div className="space-y-2 p-4">
-          <h2 className="text-xl font-bold text-white">{movie.title}</h2>
-          <p className="text-xs text-slate-400">
-            {movie.releaseYear || "—"} · {movie.genres.join(", ")} · {movie.languageLabel} ·{" "}
+        <div className="space-y-3 p-5">
+          <h2 className="font-[family-name:var(--font-display)] text-[1.75rem] leading-tight tracking-[0.04em] text-white">
+            {movie.title}
+          </h2>
+          <p className="text-xs leading-relaxed text-[var(--cinema-muted-gold)]">
+            {movie.releaseYear || "—"} · {movie.genres.join(" · ")} · {movie.languageLabel} ·{" "}
             {movie.runtimeMinutes ? `${movie.runtimeMinutes} min` : "? min"} · ★ {movie.rating}
           </p>
-          <p className="text-sm leading-relaxed text-slate-300">{movie.overview}</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-[15px] leading-relaxed text-slate-300">{movie.overview}</p>
+          <p className="text-[12px] text-slate-500">
             <span className="font-semibold text-slate-400">Director</span> {movie.director}
           </p>
-          <p className="text-xs text-slate-500">
+          <p className="text-[12px] text-slate-500">
             <span className="font-semibold text-slate-400">Cast</span> {movie.actors.join(", ")}
           </p>
         </div>
       </div>
-      <p className="mt-3 text-center text-xs text-slate-600">Swipe right · like · left · pass — or use buttons.</p>
 
-      <div className={cn("pointer-events-none fixed bottom-28 left-0 right-0 z-10 md:pointer-events-auto md:relative md:bottom-auto md:z-0 md:mt-6 md:flex md:justify-center")}>
-        <div className="pointer-events-auto mx-auto flex max-w-md gap-3 px-4">
+      <p className="mt-5 text-center text-[12px] leading-relaxed text-slate-500">
+        Drag the card · <span className="text-[var(--cinema-teal)]">→ like</span> ·{" "}
+        <span className="text-[var(--cinema-ruby)]">← pass</span> — or tap the aisle buttons below.
+      </p>
+
+      <div
+        className={cn(
+          "pointer-events-none fixed left-0 right-0 z-10 px-4",
+          "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] md:pointer-events-auto md:relative md:bottom-auto md:z-0 md:mt-7 md:flex md:justify-center md:pb-0",
+        )}
+      >
+        <div className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-3 gap-3">
           <button
             type="button"
             onClick={() => void onDecision("disliked")}
-            className="flex-1 rounded-2xl border border-slate-700 py-4 text-sm font-semibold text-slate-300"
+            className="min-h-[52px] rounded-2xl border border-[rgba(180,74,92,0.35)] bg-[rgba(40,14,22,0.25)] py-4 text-[13px] font-bold text-rose-100 active:scale-[0.98]"
           >
-            Dislike
+            Pass
           </button>
           <button
             type="button"
             onClick={() => void onDecision("skipped")}
-            className="flex-1 rounded-2xl border border-slate-700 py-4 text-sm font-semibold text-slate-400"
+            className="min-h-[52px] rounded-2xl border border-[rgba(148,134,170,0.28)] bg-[rgba(12,10,20,0.6)] py-4 text-[13px] font-bold text-slate-300 active:scale-[0.98]"
           >
             Skip
           </button>
           <button
             type="button"
             onClick={() => void onDecision("liked")}
-            className="flex-1 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-500 py-4 text-sm font-bold text-slate-950 shadow-lg"
+            className="btn-spotlight min-h-[52px] py-4 text-[13px] active:scale-[0.98]"
           >
-            Like
+            Love it
           </button>
         </div>
       </div>

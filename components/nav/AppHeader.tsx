@@ -1,39 +1,52 @@
 import Link from "next/link";
+import { cn } from "@/lib/cn";
 
 const links = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/swipe", label: "Swipe" },
-  { href: "/matches", label: "Matches" },
-  { href: "/friends", label: "Friends" },
-  { href: "/requests", label: "Requests" },
-  { href: "/profile", label: "Profile" },
+  { href: "/dashboard", label: "Lobby" },
+  { href: "/swipe", label: "Now showing" },
+  { href: "/matches", label: "Double features" },
+  { href: "/friends", label: "Crew" },
+  { href: "/requests", label: "Invites" },
+  { href: "/profile", label: "Your seat" },
 ] as const;
 
-export function AppHeader({ title }: { title?: string }) {
+export function AppHeader() {
   return (
-    <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-[#0b1220]/90 backdrop-blur-md">
-      <div className="mx-auto flex max-w-5xl items-center gap-4 px-4 py-3">
-        <Link href="/dashboard" className="text-lg font-bold tracking-tight text-white">
-          Movie<span className="text-cyan-400">Match</span>
-        </Link>
-        <nav className="hidden flex-1 flex-wrap justify-center gap-2 md:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-lg px-3 py-1 text-sm font-medium text-slate-300 hover:bg-white/10"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="ml-auto hidden text-sm font-medium text-slate-400 lg:block">{title ?? ""}</div>
-        <Link
-          href="/settings"
-          className="rounded-lg border border-slate-700 px-3 py-1.5 text-xs font-semibold text-slate-300"
-        >
-          Settings
-        </Link>
+    <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)]">
+      <div className="border-b border-[rgba(232,200,106,0.12)] bg-[#0c0a12]/92 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:gap-6">
+          <Link
+            href="/dashboard"
+            className="shrink-0 font-[family-name:var(--font-display)] text-2xl tracking-[0.06em] text-white"
+          >
+            <span className="text-[var(--cinema-muted-gold)]">MOVIE</span>
+            <span className="ml-1.5 text-white">MATCH</span>
+          </Link>
+          <nav className="hidden flex-1 flex-wrap justify-center gap-1 md:flex md:gap-0.5 lg:gap-2">
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={cn(
+                  "rounded-xl px-3 py-2 text-[13px] font-medium tracking-wide text-slate-400 transition-colors",
+                  "hover:bg-[var(--cinema-teal-dim)] hover:text-[var(--cinema-teal)]",
+                )}
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            className="ml-auto grid min-h-[44px] min-w-[44px] shrink-0 place-items-center rounded-xl border border-[rgba(232,200,106,0.18)] px-3 text-[var(--cinema-muted-gold)] transition-colors hover:border-[rgba(232,200,106,0.35)] hover:bg-[rgba(232,200,106,0.06)] md:px-4"
+          >
+            <span className="text-[18px] md:hidden" aria-hidden>
+              ⚙
+            </span>
+            <span className="hidden text-[13px] font-semibold text-[var(--cinema-muted-gold)] md:inline">Settings</span>
+          </Link>
+        </div>
       </div>
     </header>
   );

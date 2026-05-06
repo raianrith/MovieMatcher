@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { PageHeading } from "@/components/layout/PageHeading";
 import { createClient } from "@/lib/supabaseClient";
 import { getIncomingRequests, getOutgoingRequests, respondToRequest } from "@/lib/friends";
 import { toast } from "sonner";
@@ -42,10 +43,10 @@ export default function RequestsPage() {
       await respondToRequest(supabase, id, status);
       toast.success(
         status === "accepted"
-          ? "You are now friends!"
+          ? "They’re on your crew!"
           : status === "blocked"
-            ? "Request blocked."
-            : "Request declined.",
+            ? "Invite blocked."
+            : "Invitation torn up.",
       );
       void load();
     } catch (e) {
@@ -56,50 +57,51 @@ export default function RequestsPage() {
   type ProfileLite = { username?: string; display_name?: string | null };
 
   return (
-    <div className="space-y-10">
-      <div>
-        <h2 className="text-xl font-bold text-white">Friend requests</h2>
-        <p className="text-sm text-slate-500">Incoming need your tap · outgoing awaits their response.</p>
-      </div>
+    <div className="space-y-14">
+      <PageHeading
+        eyebrow="The inbox"
+        title="INVITES"
+        subtitle="Accept to share double features · decline frees your list · block hides them from contacting you."
+      />
 
-      <section className="space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Incoming</h3>
+      <section className="space-y-5">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Rolling in</h2>
         {loading ? (
-          <p className="text-slate-500">Loading…</p>
+          <p className="text-slate-500">Checking the mail slot…</p>
         ) : incoming.length === 0 ? (
-          <p className="rounded-2xl border border-dashed border-slate-800 p-8 text-center text-sm text-slate-500">
-            No pending invites right now 🎉
-          </p>
+          <div className="panel-ticket-dashed p-10 text-center text-[15px] text-slate-400">
+            No invites right now — your aisle is calm.
+          </div>
         ) : (
-          <ul className="divide-y divide-slate-900 rounded-3xl border border-slate-800 bg-slate-950/60">
+          <ul className="divide-y divide-[rgba(148,134,170,0.08)] overflow-hidden rounded-2xl border border-[rgba(232,200,106,0.12)] bg-[rgba(18,14,26,0.55)]">
             {incoming.map((r) => {
               const p = r.sender as ProfileLite | undefined;
               const id = r.id as string;
               return (
-                <li key={id} className="flex flex-wrap items-center gap-3 px-4 py-4">
-                  <div className="min-w-0 flex-1">
+                <li key={id} className="gap-4 p-5">
+                  <div className="min-w-0">
                     <p className="font-semibold text-white">{p?.display_name ?? p?.username ?? "Someone"}</p>
-                    <p className="text-xs text-slate-500">@{p?.username}</p>
+                    <p className="text-[13px] text-slate-500">@{p?.username}</p>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="mt-4 flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => void act(id, "accepted")}
-                      className="rounded-lg bg-cyan-500 px-3 py-2 text-xs font-bold text-slate-950"
+                      className="btn-spotlight min-h-[44px] flex-1 px-5 py-3 text-[13px] sm:flex-none sm:py-3"
                     >
                       Accept
                     </button>
                     <button
                       type="button"
                       onClick={() => void act(id, "declined")}
-                      className="rounded-lg border border-slate-700 px-3 py-2 text-xs font-semibold text-slate-300"
+                      className="min-h-[44px] rounded-xl border border-[rgba(148,134,170,0.28)] px-5 py-3 text-[13px] font-bold text-slate-200"
                     >
                       Decline
                     </button>
                     <button
                       type="button"
                       onClick={() => void act(id, "blocked")}
-                      className="rounded-lg border border-rose-500/50 px-3 py-2 text-xs font-semibold text-rose-300"
+                      className="min-h-[44px] rounded-xl border border-[rgba(180,74,92,0.35)] px-4 py-3 text-[13px] font-bold text-rose-200"
                     >
                       Block
                     </button>
@@ -111,19 +113,19 @@ export default function RequestsPage() {
         )}
       </section>
 
-      <section className="space-y-4">
-        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">Outgoing</h3>
+      <section className="space-y-5">
+        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Awaiting encore</h2>
         {outgoing.length === 0 ? (
-          <p className="text-sm text-slate-500">You haven&apos;t sent any invitations.</p>
+          <p className="text-[15px] text-slate-500">No pending invites you&apos;ve sent.</p>
         ) : (
-          <ul className="divide-y divide-slate-900 rounded-3xl border border-slate-800 bg-slate-950/60">
+          <ul className="divide-y divide-[rgba(148,134,170,0.08)] overflow-hidden rounded-2xl border border-[rgba(148,134,170,0.14)] bg-[rgba(10,9,14,0.6)]">
             {outgoing.map((r) => {
               const p = r.receiver as ProfileLite | undefined;
               return (
-                <li key={r.id as string} className="flex items-center px-4 py-4">
+                <li key={r.id as string} className="flex items-center px-5 py-4">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-white">@{p?.username}</p>
-                    <p className="text-xs capitalize text-slate-500">{r.status as string}</p>
+                    <p className="text-[12px] capitalize text-slate-500">{r.status as string}</p>
                   </div>
                 </li>
               );

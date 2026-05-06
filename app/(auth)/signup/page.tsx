@@ -21,7 +21,7 @@ export default function SignupPage() {
       const supabase = createClient();
       const u = username.trim().toLowerCase();
       if (u.length < 3 || !/^[a-z0-9_]+$/.test(u)) {
-        throw new Error("Username: 3+ chars, lowercase letters, numbers, underscore only.");
+        throw new Error("Handle: 3+ characters, lowercase letters, numbers, or _ only.");
       }
       const { data, error } = await supabase.auth.signUp({
         email: email.trim(),
@@ -36,7 +36,7 @@ export default function SignupPage() {
         },
       });
       if (error) throw error;
-      toast.success(data.session ? "Welcome!" : "Check your inbox to verify your email.", {
+      toast.success(data.session ? "You're in — lights down!" : "Check your email to verify your ticket.", {
         duration: 4500,
       });
       router.push("/dashboard");
@@ -49,44 +49,51 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-3xl border border-slate-800 bg-slate-950/60 p-8 shadow-xl">
-      <h1 className="text-2xl font-bold text-white">Create account</h1>
-      <p className="mt-1 text-sm text-slate-500">
-        Profiles are keyed to your Auth user · pick a unique handle.
-      </p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-4">
-        <label className="block text-xs font-semibold uppercase text-slate-500">
-          Username (public)
+    <div className="panel-ticket relative w-full max-w-sm overflow-hidden p-8 sm:p-9">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-6 top-4 h-8 w-[1px] bg-[repeating-linear-gradient(transparent_0_3px,rgba(232,200,106,0.25)_3px_6px)] opacity-70"
+      />
+      <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-[0.05em] text-white">JOIN</h1>
+      <p className="mt-3 text-[15px] text-slate-400">Choose a public handle friends can search for.</p>
+      <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-5">
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
+          Handle <span className="font-normal text-slate-500">(public)</span>
           <input
             value={username}
             onChange={(e) => setUsername(e.target.value.toLowerCase())}
             required
             minLength={3}
-            placeholder="jay_cinephile"
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-slate-100 outline-none ring-cyan-500/40 focus:ring-2"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            placeholder="e.g. reel_addict"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
-        <label className="block text-xs font-semibold uppercase text-slate-500">
-          Display name
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
+          Screen name
           <input
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-slate-100 outline-none ring-cyan-500/40 focus:ring-2"
+            placeholder="How your crew sees you"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
-        <label className="block text-xs font-semibold uppercase text-slate-500">
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
           Email
           <input
             type="email"
             autoComplete="email"
+            inputMode="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-slate-100 outline-none ring-cyan-500/40 focus:ring-2"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
-        <label className="block text-xs font-semibold uppercase text-slate-500">
-          Password
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
+          Password <span className="font-normal text-slate-500">(8+ characters)</span>
           <input
             type="password"
             autoComplete="new-password"
@@ -94,20 +101,20 @@ export default function SignupPage() {
             minLength={8}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-slate-100 outline-none ring-cyan-500/40 focus:ring-2"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
         <button
           disabled={loading}
           type="submit"
-          className="w-full rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-500 py-3.5 font-bold text-slate-950 shadow-lg shadow-cyan-500/25 disabled:opacity-50"
+          className="btn-spotlight w-full px-6 py-4 text-[16px] disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {loading ? "Saving…" : "Sign up"}
+          {loading ? "Saving your seat…" : "Start swiping"}
         </button>
       </form>
-      <p className="mt-8 text-center text-sm text-slate-500">
-        Already onboard?{" "}
-        <Link href="/login" className="font-semibold text-cyan-400">
+      <p className="mt-10 text-center text-[15px] text-slate-500">
+        Have a pass?{" "}
+        <Link href="/login" className="font-semibold text-[var(--cinema-teal)] underline-offset-4 hover:underline">
           Log in
         </Link>
       </p>

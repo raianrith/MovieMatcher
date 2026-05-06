@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { PageHeading } from "@/components/layout/PageHeading";
 import { createClient } from "@/lib/supabaseClient";
 import type { Profile } from "@/lib/types";
 import { toast } from "sonner";
@@ -46,7 +47,7 @@ export default function ProfilePage() {
         })
         .eq("id", profile.id);
       if (error) throw error;
-      toast.success("Saved profile ✓");
+      toast.success("Spotlight updated");
       void load();
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Cannot save profile");
@@ -54,38 +55,43 @@ export default function ProfilePage() {
   };
 
   if (!profile) {
-    return <p className="text-slate-500">Working on your dossier…</p>;
+    return <p className="text-center text-slate-500">Loading your marquee…</p>;
   }
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white">Public profile</h2>
-        <p className="text-sm text-slate-500">
-          @{profile.username} is fixed · tune how pals see your name / avatar badge.
-        </p>
-      </div>
-      <form onSubmit={(e) => void save(e)} className="space-y-5 rounded-3xl border border-slate-800 bg-slate-950/70 p-6">
-        <label className="block text-xs uppercase text-slate-500">
-          Display name
+    <div className="mx-auto max-w-md space-y-8">
+      <PageHeading
+        eyebrow="Your seat"
+        title="PROGRAM"
+        subtitle={
+          <>
+            Handle <span className="text-[var(--cinema-muted-gold)]">@{profile.username}</span> is permanent. Tune your
+            screen name and portrait link for friends.
+          </>
+        }
+      />
+      <form onSubmit={(e) => void save(e)} className="panel-ticket space-y-6 p-7">
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)]">
+          Screen name
           <input
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-white outline-none ring-cyan-500/35 focus:ring-2"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
-        <label className="block text-xs uppercase text-slate-500">
-          Avatar URL
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)]">
+          Portrait URL
           <input
             type="url"
+            inputMode="url"
             value={avatarUrl}
             onChange={(e) => setAvatarUrl(e.target.value)}
-            placeholder="https://..."
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-white outline-none ring-cyan-500/35 focus:ring-2"
+            placeholder="https://…"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
-        <button type="submit" className="w-full rounded-2xl bg-cyan-500 py-4 font-bold text-slate-950">
-          Save
+        <button type="submit" className="btn-spotlight w-full py-4 text-[16px]">
+          Save changes
         </button>
       </form>
     </div>

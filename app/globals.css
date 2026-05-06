@@ -1,13 +1,29 @@
 @import "tailwindcss";
 
+/* Cinema night — deep velvet, gold accents, soft spotlight */
 :root {
-  --background: #070b14;
-  --foreground: #e2e8f0;
+  --background: #0c0a12;
+  --foreground: #ebe6f0;
+
+  --cinema-black: #050408;
+  --cinema-void: #0c0a12;
+  --cinema-rafter: #17131f;
+  --cinema-muted-gold: #c9a962;
+  --cinema-gold: #e8c86a;
+  --cinema-card: rgba(22, 18, 32, 0.92);
+  --cinema-ruby: #b44a5c;
+  --cinema-teal: #3dd4c0;
+  --cinema-teal-dim: rgba(61, 212, 192, 0.14);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(56px + env(safe-area-inset-top));
 }
 
 body {
@@ -16,6 +32,91 @@ body {
   min-height: 100vh;
 }
 
-html {
-  -webkit-text-size-adjust: 100%;
+/* Velvet stage + vignette — mobile-first, GPU-friendly */
+.cinema-backdrop {
+  position: relative;
+  isolation: isolate;
+  background-color: var(--cinema-black);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 50% -20%, rgba(61, 212, 192, 0.09), transparent 45%),
+    radial-gradient(ellipse 90% 60% at 50% 100%, rgba(180, 74, 92, 0.07), transparent 50%),
+    linear-gradient(180deg, var(--cinema-black) 0%, var(--cinema-void) 42%, var(--cinema-black) 100%);
+}
+
+.cinema-backdrop::before {
+  pointer-events: none;
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  opacity: 0.35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Ticket / marquee panel */
+.panel-ticket {
+  border-radius: 1rem;
+  border: 1px solid rgba(232, 200, 106, 0.12);
+  background: linear-gradient(165deg, rgba(28, 24, 40, 0.95) 0%, rgba(14, 12, 22, 0.88) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.45);
+}
+
+.panel-ticket-dashed {
+  border-radius: 1rem;
+  border: 1px dashed rgba(148, 134, 170, 0.22);
+  background: rgba(12, 10, 20, 0.35);
+}
+
+/* Inputs tuned for thumbs */
+.field-cinema {
+  border-radius: 0.875rem;
+  border: 1px solid rgba(148, 134, 170, 0.22);
+  background: rgba(5, 4, 8, 0.75);
+  min-height: 2.875rem;
+  padding-inline: 1rem;
+  font-size: 1rem;
+  color: var(--foreground);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.field-cinema::placeholder {
+  color: rgb(148 163 184 / 0.55);
+}
+
+.field-cinema:focus {
+  border-color: rgba(61, 212, 192, 0.45);
+  box-shadow: 0 0 0 3px rgba(61, 212, 192, 0.12);
+}
+
+.btn-spotlight {
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #3dd4c0 0%, #2a9d8f 55%, #1e7f74 100%);
+  color: #050408;
+  font-weight: 700;
+  min-height: 3rem;
+  box-shadow:
+    0 4px 20px rgba(61, 212, 192, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.btn-spotlight:active {
+  transform: translateY(1px);
+}
+
+.btn-ruby-outline {
+  border-radius: 1rem;
+  border: 1px solid rgba(180, 74, 92, 0.45);
+  color: rgb(251 207 219);
+  min-height: 3rem;
+  font-weight: 700;
+}
+
+/* Gold marquee text utility */
+.marquee-rule {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(232, 200, 106, 0.35), transparent);
 }

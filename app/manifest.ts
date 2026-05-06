@@ -4,7 +4,9 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Movie Match",
     short_name: "Match",
-    description: "Tinder-style movie picker for couples",
+    description: "Swipe movies with friends — mutual likes become your shared watchlist.",
+    background_color: "#0c0a12",
+    theme_color: "#0c0a12",
     display: "standalone",
     orientation: "portrait-primary",
     start_url: "/",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { PageHeading } from "@/components/layout/PageHeading";
 import { createClient } from "@/lib/supabaseClient";
 import { toast } from "sonner";
 
@@ -14,23 +15,24 @@ export default function SettingsPage() {
       toast.error(error.message);
       return;
     }
-    toast.success("Signed out cleanly");
+    toast.success("See you at the next show.");
     router.push("/login");
     router.refresh();
   };
 
   return (
-    <div className="mx-auto max-w-md space-y-6">
-      <h2 className="text-xl font-bold text-white">Settings</h2>
-      <p className="text-sm text-slate-500">
-        Session control lives here — nothing flashy, just logout when you borrow someone&apos;s phone.
-      </p>
+    <div className="mx-auto max-w-md space-y-8">
+      <PageHeading
+        eyebrow="House lights"
+        title="SETTINGS"
+        subtitle="Account session only — swipe data stays in Supabase until you delete it there."
+      />
       <button
         type="button"
         onClick={() => void signOut()}
-        className="w-full rounded-2xl border border-rose-500/50 py-4 font-bold text-rose-300 hover:bg-rose-950/30"
+        className="btn-ruby-outline w-full py-4 text-[16px] transition-colors hover:bg-[rgba(180,74,92,0.12)] active:scale-[0.99]"
       >
-        Log out
+        Leave theatre — log out
       </button>
     </div>
   );

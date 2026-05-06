@@ -14,9 +14,11 @@ export default async function AppShellLayout({ children }: { children: React.Rea
   if (!session) redirect("/login");
 
   return (
-    <div className="min-h-dvh bg-[#070b14] text-slate-100">
+    <div className="flex min-h-dvh flex-col text-slate-100">
       <AppHeader />
-      <main className="mx-auto max-w-5xl px-4 pb-28 pt-4 md:pb-8">{children}</main>
+      <main className="mx-auto w-full max-w-lg flex-1 px-4 pb-[calc(7rem+env(safe-area-inset-bottom))] pt-5 md:max-w-3xl md:pb-12 md:pt-8 lg:max-w-5xl">
+        {children}
+      </main>
       <BottomNav />
       <MatchToasts initialSession={session} />
       <RegisterSW />

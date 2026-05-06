@@ -1,12 +1,14 @@
 import { SwipeDeck } from "@/components/swipe/SwipeDeck";
+import { PageHeading } from "@/components/layout/PageHeading";
 
 export default function SwipeScreenPage() {
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-xl font-bold text-white">Discover</h2>
-        <p className="text-sm text-slate-500">TMDB titles you haven&apos;t judged yet · swipes sync to Postgres.</p>
-      </div>
+    <div className="space-y-2">
+      <PageHeading
+        eyebrow="Now showing"
+        title="PICK YOUR NEXT SHOW"
+        subtitle="Swipe the card — right if you’d watch it, left to pass. Skip jumps ahead without grading. Matches appear when friends feel the same way."
+      />
       <SwipeDeck />
     </div>
   );

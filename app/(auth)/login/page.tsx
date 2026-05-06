@@ -19,7 +19,7 @@ export default function LoginPage() {
       const supabase = createClient();
       const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
       if (error) throw error;
-      toast.success("Signed in");
+      toast.success("Welcome back!");
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
@@ -30,22 +30,27 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-sm rounded-3xl border border-slate-800 bg-slate-950/60 p-8 shadow-xl">
-      <h1 className="text-2xl font-bold text-white">Welcome back</h1>
-      <p className="mt-1 text-sm text-slate-500">Email + password from Supabase Auth.</p>
-      <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-4">
-        <label className="block text-xs font-semibold uppercase text-slate-500">
+    <div className="panel-ticket relative w-full max-w-sm overflow-hidden p-8 sm:p-9">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute right-6 top-4 h-8 w-[1px] bg-[repeating-linear-gradient(transparent_0_3px,rgba(232,200,106,0.25)_3px_6px)] opacity-70"
+      />
+      <h1 className="font-[family-name:var(--font-display)] text-4xl tracking-[0.05em] text-white">SIGN IN</h1>
+      <p className="mt-3 text-[15px] text-slate-400">Same email &amp; password you used at the door.</p>
+      <form onSubmit={(e) => void onSubmit(e)} className="mt-8 space-y-5">
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
           Email
           <input
             type="email"
             autoComplete="email"
+            inputMode="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-slate-100 outline-none ring-cyan-500/40 focus:ring-2"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
-        <label className="block text-xs font-semibold uppercase text-slate-500">
+        <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
           Password
           <input
             type="password"
@@ -53,21 +58,21 @@ export default function LoginPage() {
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="mt-2 w-full rounded-xl border border-slate-700 bg-[#070b14] px-4 py-3 text-slate-100 outline-none ring-cyan-500/40 focus:ring-2"
+            className="field-cinema mt-2 block w-full"
           />
         </label>
         <button
           disabled={loading}
           type="submit"
-          className="w-full rounded-2xl bg-cyan-500 py-3.5 font-bold text-slate-950 disabled:opacity-50"
+          className="btn-spotlight w-full px-6 py-4 text-[16px] disabled:cursor-not-allowed disabled:opacity-45"
         >
-          {loading ? "Signing in…" : "Continue"}
+          {loading ? "Opening curtain…" : "Enter lobby"}
         </button>
       </form>
-      <p className="mt-8 text-center text-sm text-slate-500">
-        No account yet?{" "}
-        <Link href="/signup" className="font-semibold text-cyan-400">
-          Sign up
+      <p className="mt-10 text-center text-[15px] text-slate-500">
+        New here?{" "}
+        <Link href="/signup" className="font-semibold text-[var(--cinema-teal)] underline-offset-4 hover:underline">
+          Create a free ticket
         </Link>
       </p>
     </div>
