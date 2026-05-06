@@ -1,7 +1,11 @@
 /* Minimal installable shell; extend with workbox if you need offline cards. */
-const CACHE = "movie-match-v2";
+const CACHE = "movie-match-v3";
 // Only cache the public shell. Do NOT cache authenticated pages like /swipe or /matches.
 const ASSETS = ["/", "/manifest.webmanifest"];
+
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+});
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -24,7 +28,19 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   // Never cache API requests.
   if (new URL(request.url).pathname.startsWith("/api/")) return;
-  event.respondWith(
-    fetch(request).catch(() => caches.match(request).then((r) => r || caches.match("/"))),
-  );
+
+  // Never intercept navigations — avoids stale HTML and auth redirect caching.
+  if (request.mode === "navigate") return;
+
+  // Cache-first for the tiny public shell only.
+  if (ASSETS.includes(new URL(request.url).pathname)) {
+    event.respondWith(
+      caches.match(request).then((cached) => cached || fetch(request).then((res) => {
+        const copy = res.clone();
+        void caches.open(CACHE).then((cache) => cache.put(request, copy));
+        return res;
+      })),
+    );
+    return;
+  }
 });
