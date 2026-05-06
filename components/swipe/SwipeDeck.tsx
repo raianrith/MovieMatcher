@@ -9,7 +9,9 @@ import { createClient } from "@/lib/supabaseClient";
 import { recordSwipe } from "@/lib/swipes";
 import { toast } from "sonner";
 
-const labels: Pick<Record<SwipeActionDb, string>, "liked" | "skipped"> = {
+type SwipeChoice = "liked" | "skipped";
+
+const labels: Record<SwipeChoice, string> = {
   liked: "Added to your likes!",
   skipped: "Mehhh. Next.",
 };
@@ -17,7 +19,7 @@ const labels: Pick<Record<SwipeActionDb, string>, "liked" | "skipped"> = {
 const SWIPE_DIST = 64;
 const SWIPE_VEL = 0.22;
 
-function mapGestureToAction(mx: number, dx: number, v: number, last: boolean): "liked" | "skipped" | null {
+function mapGestureToAction(mx: number, dx: number, v: number, last: boolean): SwipeChoice | null {
   if (!last) return null;
   // `velocity` is a magnitude per-axis; use `direction` for sign.
   if (mx >= SWIPE_DIST || (dx > 0 && v > SWIPE_VEL)) return "liked";
@@ -66,14 +68,14 @@ export function SwipeDeck() {
 
   const movie = movies[busyIdx];
 
-  const onDecision = async (action: SwipeActionDb, snapshot?: MovieSnapshot) => {
+  const onDecision = async (action: SwipeChoice, snapshot?: MovieSnapshot) => {
     const snap = snapshot ?? movies[busyIdx];
     const uidLocal = userId ?? (await createClient().auth.getUser()).data.user?.id;
     if (!snap || !uidLocal) return;
 
     try {
       const client = createClient();
-      await recordSwipe({ supabase: client, userId: uidLocal, action, snapshot: snap });
+      await recordSwipe({ supabase: client, userId: uidLocal, action: action as SwipeActionDb, snapshot: snap });
       toast.message(labels[action], { duration: 2000 });
 
       const nextIdx = busyIdx + 1;
