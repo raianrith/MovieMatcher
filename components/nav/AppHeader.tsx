@@ -31,7 +31,7 @@ export function AppHeader() {
   }, []);
 
   return (
-    <header className="sticky top-0 z-40">
+    <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)]">
       <div className="border-b border-[rgba(232,200,106,0.12)] bg-[#0c0a12]/92 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:gap-6">
           <Link
