@@ -86,7 +86,12 @@ export function MatchesExplorer() {
 
   const genreOptions = useMemo(() => {
     const set = new Set<string>();
-    for (const r of rows) r.movie_snapshot.genres.forEach((g) => set.add(g));
+    for (const r of rows) {
+      const genres = Array.isArray(r.movie_snapshot?.genres) ? r.movie_snapshot.genres : [];
+      for (const g of genres) {
+        if (typeof g === "string") set.add(g);
+      }
+    }
     return [...set].sort((a, b) => a.localeCompare(b));
   }, [rows]);
 
@@ -217,7 +222,8 @@ export function MatchesExplorer() {
                         {snapshot.title}
                       </h2>
                       <p className="mt-2 text-[12px] text-[var(--cinema-muted-gold)]">
-                        {snapshot.releaseYear || "—"} · {snapshot.genres.join(" · ")}
+                        {snapshot.releaseYear || "—"} ·{" "}
+                        {Array.isArray(snapshot.genres) ? snapshot.genres.join(" · ") : ""}
                       </p>
                       <p className="mt-2 text-[12px] text-slate-500">
                         {snapshot.languageLabel} · {snapshot.runtimeMinutes ? `${snapshot.runtimeMinutes} min` : "?"}{" "}
@@ -229,7 +235,8 @@ export function MatchesExplorer() {
                       <span className="font-semibold text-slate-400">Director</span> {snapshot.director}
                     </p>
                     <p className="text-[12px] text-slate-500">
-                      <span className="font-semibold text-slate-400">Cast</span> {snapshot.actors.join(", ")}
+                      <span className="font-semibold text-slate-400">Cast</span>{" "}
+                      {Array.isArray(snapshot.actors) ? snapshot.actors.join(", ") : ""}
                     </p>
 
                     <div className="space-y-4 border-t border-[rgba(148,134,170,0.12)] pt-5">
