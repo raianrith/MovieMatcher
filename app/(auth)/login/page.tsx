@@ -5,6 +5,7 @@ export default async function LoginPage(props: { searchParams?: Promise<Record<s
   const searchParams = (await props.searchParams) ?? {};
   const error = typeof searchParams.error === "string" ? searchParams.error : undefined;
   const notice = typeof searchParams.notice === "string" ? searchParams.notice : undefined;
+  const next = typeof searchParams.next === "string" ? searchParams.next : "";
   return (
     <div className="panel-ticket relative w-full max-w-sm overflow-hidden p-8 sm:p-9">
       <div
@@ -24,6 +25,7 @@ export default async function LoginPage(props: { searchParams?: Promise<Record<s
         </p>
       ) : null}
       <form action={signInAction} className="mt-8 space-y-5">
+        <input type="hidden" name="next" value={next} />
         <label className="block text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--cinema-muted-gold)] opacity-95">
           Email
           <input

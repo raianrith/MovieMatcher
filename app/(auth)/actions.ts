@@ -15,6 +15,7 @@ async function originFromHeaders(): Promise<string> {
  export async function signInAction(formData: FormData) {
    const email = String(formData.get("email") ?? "").trim();
    const password = String(formData.get("password") ?? "");
+  const next = String(formData.get("next") ?? "");
  
    if (!email || !password) redirect(`/login?error=${encodeURIComponent("Enter email + password.")}`);
  
@@ -22,7 +23,8 @@ async function originFromHeaders(): Promise<string> {
    const { error } = await supabase.auth.signInWithPassword({ email, password });
    if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
  
-   redirect("/dashboard");
+  if (next && next.startsWith("/")) redirect(next);
+  redirect("/dashboard");
  }
  
  export async function signUpAction(formData: FormData) {
