@@ -2,7 +2,7 @@
  
  import { redirect } from "next/navigation";
 import { headers } from "next/headers";
- import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createActionSupabaseClient } from "@/lib/supabase/server";
  
 async function originFromHeaders(): Promise<string> {
   const h = await headers();
@@ -18,7 +18,7 @@ async function originFromHeaders(): Promise<string> {
  
    if (!email || !password) redirect(`/login?error=${encodeURIComponent("Enter email + password.")}`);
  
-   const supabase = await createServerSupabaseClient();
+  const supabase = await createActionSupabaseClient();
    const { error } = await supabase.auth.signInWithPassword({ email, password });
    if (error) redirect(`/login?error=${encodeURIComponent(error.message)}`);
  
@@ -40,7 +40,7 @@ async function originFromHeaders(): Promise<string> {
      );
    }
  
-   const supabase = await createServerSupabaseClient();
+  const supabase = await createActionSupabaseClient();
   const origin = await originFromHeaders();
  
    const { data, error } = await supabase.auth.signUp({
