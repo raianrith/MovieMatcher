@@ -1,5 +1,9 @@
+ "use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/cn";
+import { createClient } from "@/lib/supabaseClient";
 
 const links = [
   { href: "/dashboard", label: "Lobby" },
@@ -12,9 +16,23 @@ const links = [
 ] as const;
 
 export function AppHeader() {
+  const [handle, setHandle] = useState<string | null>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    void (async () => {
+      const supabase = createClient();
+      const uid = (await supabase.auth.getUser()).data.user?.id;
+      if (!uid) return;
+      const { data } = await supabase.from("profiles").select("username, avatar_url").eq("id", uid).maybeSingle();
+      if (data?.username) setHandle(`@${data.username}`);
+      if (typeof data?.avatar_url === "string") setAvatarUrl(data.avatar_url);
+    })();
+  }, []);
+
   return (
-    <header className="sticky top-0 z-40 pt-[env(safe-area-inset-top)]">
-      <div className="border-b border-[rgba(232,200,106,0.12)] bg-[#0c0a12]/92 backdrop-blur-xl">
+    <header className="pt-[env(safe-area-inset-top)]">
+      <div className="border-b border-[rgba(232,200,106,0.10)] bg-[#0c0a12]/70 backdrop-blur-xl">
         <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:gap-6">
           <Link
             href="/dashboard"
@@ -23,6 +41,27 @@ export function AppHeader() {
             <span className="text-[var(--cinema-muted-gold)]">MOVIE</span>
             <span className="ml-1.5 text-white">MATCH</span>
           </Link>
+
+          <div className="ml-2 hidden items-center gap-2 md:flex">
+            <div className="relative h-8 w-8 overflow-hidden rounded-full border border-[rgba(232,200,106,0.16)] bg-[rgba(8,6,14,0.55)]">
+              {avatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatarUrl}
+                  alt=""
+                  className="h-full w-full object-cover"
+                  draggable={false}
+                  referrerPolicy="no-referrer"
+                />
+              ) : (
+                <div className="grid h-full w-full place-items-center text-[10px] font-bold text-[var(--cinema-muted-gold)]">
+                  MM
+                </div>
+              )}
+            </div>
+            <p className="text-[13px] font-semibold text-slate-300">{handle ?? "—"}</p>
+          </div>
+
           <nav className="hidden flex-1 flex-wrap justify-center gap-1 md:flex md:gap-0.5 lg:gap-2">
             {links.map((l) => (
               <Link
@@ -37,18 +76,23 @@ export function AppHeader() {
               </Link>
             ))}
           </nav>
-          <Link
-            href="/settings"
-            aria-label="Settings"
-            className="ml-auto grid min-h-[44px] min-w-[44px] shrink-0 place-items-center rounded-xl border border-[rgba(232,200,106,0.18)] px-3 text-[var(--cinema-muted-gold)] transition-colors hover:border-[rgba(232,200,106,0.35)] hover:bg-[rgba(232,200,106,0.06)] md:px-4"
-          >
-            <span className="text-[18px] md:hidden" aria-hidden>
-              ⚙
-            </span>
-            <span className="hidden text-[13px] font-semibold text-[var(--cinema-muted-gold)] md:inline">Settings</span>
-          </Link>
         </div>
       </div>
+
+      <Link
+        href="/settings"
+        aria-label="Settings"
+        className={cn(
+          "fixed right-4 z-50 grid min-h-[46px] min-w-[46px] place-items-center rounded-2xl",
+          "top-[calc(env(safe-area-inset-top)+0.75rem)]",
+          "border border-[rgba(232,200,106,0.18)] bg-[#0c0a12]/70 text-[var(--cinema-muted-gold)] backdrop-blur-xl",
+          "shadow-[0_10px_30px_rgba(0,0,0,0.55)] hover:border-[rgba(232,200,106,0.35)] hover:bg-[rgba(232,200,106,0.06)]",
+        )}
+      >
+        <span className="text-[18px]" aria-hidden>
+          ⚙
+        </span>
+      </Link>
     </header>
   );
 }
