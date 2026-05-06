@@ -1,8 +1,16 @@
 import type { MovieSnapshot, SwipeActionDb } from "@/lib/types";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
-export async function getSwipedTmdbIds(supabase: SupabaseClient, userId: string): Promise<number[]> {
-  const { data, error } = await supabase.from("swipes").select("tmdb_movie_id").eq("user_id", userId);
+export async function getSwipedTmdbIds(
+  supabase: SupabaseClient,
+  userId: string,
+  mediaType: "movie" | "tv" = "movie",
+): Promise<number[]> {
+  const { data, error } = await supabase
+    .from("swipes")
+    .select("tmdb_movie_id")
+    .eq("user_id", userId)
+    .eq("media_type", mediaType);
   if (error) throw error;
   return (data ?? []).map((r: { tmdb_movie_id: number }) => r.tmdb_movie_id);
 }
@@ -16,6 +24,7 @@ export async function recordSwipe(params: {
   const { supabase, userId, action, snapshot } = params;
   const { error } = await supabase.from("swipes").insert({
     user_id: userId,
+    media_type: snapshot.media_type ?? "movie",
     tmdb_movie_id: snapshot.tmdb_movie_id,
     action,
     movie_snapshot: snapshot as unknown as Record<string, unknown>,

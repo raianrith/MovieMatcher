@@ -22,7 +22,7 @@ export async function fetchMatchesEnriched(params: {
 
   const q = supabase
     .from("matches")
-    .select("id, user_a_id, user_b_id, tmdb_movie_id, movie_snapshot, created_at")
+    .select("id, user_a_id, user_b_id, media_type, tmdb_movie_id, movie_snapshot, created_at")
     .or(`user_a_id.eq.${userId},user_b_id.eq.${userId}`);
 
   const { data: rowsRaw, error } = await q;
@@ -57,6 +57,7 @@ export async function fetchMatchesEnriched(params: {
     // Normalize malformed legacy rows so the client UI never crashes on missing fields.
     const ms: MovieSnapshot = {
       tmdb_movie_id: typeof msAny?.tmdb_movie_id === "number" ? msAny.tmdb_movie_id : row.tmdb_movie_id,
+      media_type: row.media_type,
       title: typeof msAny?.title === "string" ? msAny.title : "",
       releaseYear: typeof msAny?.releaseYear === "number" ? msAny.releaseYear : 0,
       genres: Array.isArray(msAny?.genres) ? (msAny!.genres.filter((g) => typeof g === "string") as string[]) : [],

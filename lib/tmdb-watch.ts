@@ -25,8 +25,12 @@ type TmdbWatchProvidersPayload = {
   >;
 };
 
-export async function fetchWatchProviders(tmdbId: number, region: string): Promise<WatchProvidersResponse> {
-  const payload = (await tmdbGet(`/movie/${tmdbId}/watch/providers`)) as TmdbWatchProvidersPayload;
+export async function fetchWatchProviders(
+  tmdbId: number,
+  region: string,
+  mediaType: "movie" | "tv" = "movie",
+): Promise<WatchProvidersResponse> {
+  const payload = (await tmdbGet(`/${mediaType}/${tmdbId}/watch/providers`)) as TmdbWatchProvidersPayload;
   const r = payload.results?.[region];
   return {
     link: r?.link ?? null,

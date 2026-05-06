@@ -10,11 +10,16 @@ export type CinemaFilter =
   | "telugu"
   | "malayalam"
   | "kannada"
-  | "bengali";
+  | "bengali"
+  | "korean";
+
+export type ContentKind = "movie" | "tv" | "anime";
 
 /** Normalized TMDB-derived payload stored in JSONB */
 export interface MovieSnapshot {
   tmdb_movie_id: number;
+  /** 'movie' or 'tv' for DB uniqueness */
+  media_type?: "movie" | "tv";
   title: string;
   releaseYear: number;
   genres: string[];
@@ -53,6 +58,7 @@ export interface MatchRowDb {
   id: string;
   user_a_id: string;
   user_b_id: string;
+  media_type: "movie" | "tv";
   tmdb_movie_id: number;
   movie_snapshot: MovieSnapshot;
   created_at: string;

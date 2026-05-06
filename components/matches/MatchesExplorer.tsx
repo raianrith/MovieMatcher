@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageHeading } from "@/components/layout/PageHeading";
-import type { CinemaFilter, MatchesSort, MatchWithFriend } from "@/lib/types";
+import type { CinemaFilter, ContentKind, MatchesSort, MatchWithFriend } from "@/lib/types";
 import { createClient } from "@/lib/supabaseClient";
 import { getFriends } from "@/lib/friends";
 import { fetchMatchesEnriched, upsertMatchUserState } from "@/lib/matches";
@@ -12,13 +12,14 @@ import { providerLogoUrl } from "@/lib/tmdb-watch";
 import { toast } from "sonner";
 
 function groupByMovie(rows: MatchWithFriend[]) {
-  const map = new Map<number, MatchWithFriend[]>();
+  const map = new Map<string, MatchWithFriend[]>();
   for (const r of rows) {
-    const bucket = map.get(r.tmdb_movie_id) ?? [];
+    const key = `${r.media_type}:${r.tmdb_movie_id}`;
+    const bucket = map.get(key) ?? [];
     bucket.push(r);
-    map.set(r.tmdb_movie_id, bucket);
+    map.set(key, bucket);
   }
-  return [...map.entries()].sort(([a], [b]) => a - b);
+  return [...map.entries()].sort(([a], [b]) => a.localeCompare(b));
 }
 
 const selectClass = "field-cinema block w-full min-h-[48px] py-2.5 text-[15px] text-slate-100 bg-[rgba(5,4,10,0.9)]";
@@ -43,10 +44,11 @@ export function MatchesExplorer() {
   const [titleSearch, setTitleSearch] = useState("");
   const [genreFilter, setGenreFilter] = useState("");
   const [cinema, setCinema] = useState<CinemaFilter>("all");
+  const [kind, setKind] = useState<ContentKind>("movie");
   const [sort, setSort] = useState<MatchesSort>("recent");
   const [buddyList, setBuddyList] = useState<Array<{ id: string; username: string }>>([]);
-  const [watchByMovie, setWatchByMovie] = useState<Record<number, WatchProvidersResponse | null>>({});
-  const [watchLoading, setWatchLoading] = useState<Record<number, boolean>>({});
+  const [watchByKey, setWatchByKey] = useState<Record<string, WatchProvidersResponse | null>>({});
+  const [watchLoading, setWatchLoading] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const ac = new AbortController();
@@ -78,7 +80,18 @@ export function MatchesExplorer() {
     if (c === "malayalam") return countries.includes("IN") && lang === "ml";
     if (c === "kannada") return countries.includes("IN") && lang === "kn";
     if (c === "bengali") return countries.includes("IN") && lang === "bn";
+    if (c === "korean") return countries.includes("KR") && lang === "ko";
     return true;
+  }, []);
+
+  const matchKind = useCallback((k: ContentKind, m: MatchWithFriend) => {
+    if (k === "movie") return m.media_type === "movie";
+    if (k === "tv") return m.media_type === "tv";
+    // Anime is modeled as TV with Japanese + Animation
+    const genres = Array.isArray(m.movie_snapshot?.genres) ? m.movie_snapshot.genres : [];
+    const lang = m.movie_snapshot?.original_language ?? "";
+    const countries = Array.isArray(m.movie_snapshot?.originCountries) ? m.movie_snapshot.originCountries : [];
+    return m.media_type === "tv" && lang === "ja" && countries.includes("JP") && genres.includes("Animation");
   }, []);
 
   const load = useCallback(async () => {
@@ -95,13 +108,13 @@ export function MatchesExplorer() {
         genre: genreFilter || undefined,
         sort,
       });
-      setRows(data.filter((m) => matchCinema(cinema, m)));
+      setRows(data.filter((m) => matchCinema(cinema, m) && matchKind(kind, m)));
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Could not load matches");
     } finally {
       setLoading(false);
     }
-  }, [supabase, friendFilter, titleSearch, genreFilter, sort, cinema, matchCinema]);
+  }, [supabase, friendFilter, titleSearch, genreFilter, sort, cinema, kind, matchCinema, matchKind]);
 
   useEffect(() => {
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- client fetch after mount */
@@ -150,24 +163,25 @@ export function MatchesExplorer() {
     }
   };
 
-  const loadWatch = async (tmdbId: number) => {
-    if (watchByMovie[tmdbId] !== undefined || watchLoading[tmdbId]) return;
-    setWatchLoading((m) => ({ ...m, [tmdbId]: true }));
+  const loadWatch = async (tmdbId: number, mediaType: "movie" | "tv") => {
+    const key = `${mediaType}:${tmdbId}`;
+    if (watchByKey[key] !== undefined || watchLoading[key]) return;
+    setWatchLoading((m) => ({ ...m, [key]: true }));
     try {
-      const res = await fetch(`/api/movies/${tmdbId}/watch?region=US`);
+      const res = await fetch(`/api/movies/${tmdbId}/watch?region=US&media_type=${encodeURIComponent(mediaType)}`);
       const json = (await res.json()) as { error?: string } & WatchProvidersResponse;
       if (!res.ok) throw new Error(json.error ?? "Failed to load providers");
-      setWatchByMovie((m) => ({ ...m, [tmdbId]: json }));
+      setWatchByKey((m) => ({ ...m, [key]: json }));
     } catch (e) {
-      setWatchByMovie((m) => ({ ...m, [tmdbId]: null }));
+      setWatchByKey((m) => ({ ...m, [key]: null }));
       toast.error(e instanceof Error ? e.message : "Could not load where to watch");
     } finally {
-      setWatchLoading((m) => ({ ...m, [tmdbId]: false }));
+      setWatchLoading((m) => ({ ...m, [key]: false }));
     }
   };
 
   const filterGrid = (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-5">
       <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
         Co-star
         <select value={friendFilter} onChange={(e) => setFriendFilter(e.target.value)} className={selectClass}>
@@ -212,6 +226,15 @@ export function MatchesExplorer() {
           <option value="malayalam">Mollywood (Malayalam)</option>
           <option value="kannada">Sandalwood (Kannada)</option>
           <option value="bengali">Bengali cinema</option>
+          <option value="korean">Korean (KR)</option>
+        </select>
+      </label>
+      <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
+        Filter by type
+        <select value={kind} onChange={(e) => setKind(e.target.value as ContentKind)} className={selectClass}>
+          <option value="movie">Movies</option>
+          <option value="tv">TV series</option>
+          <option value="anime">Anime</option>
         </select>
       </label>
       <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
@@ -254,13 +277,15 @@ export function MatchesExplorer() {
         </div>
       ) : (
         <ul className="space-y-8 pb-8">
-          {grouped.map(([tmdbId, bucket]) => {
+          {grouped.map(([groupKey, bucket]) => {
             const snapshot = bucket[0].movie_snapshot;
             const poster = snapshot.posterUrl;
-            const watch = watchByMovie[tmdbId];
+            const tmdbId = bucket[0].tmdb_movie_id;
+            const mediaType = bucket[0].media_type;
+            const watch = watchByKey[`${mediaType}:${tmdbId}`];
             return (
               <li
-                key={tmdbId}
+                key={groupKey}
                 className="overflow-hidden rounded-[1.25rem] border border-[rgba(232,200,106,0.14)] bg-gradient-to-b from-[#1c1828]/92 to-[#0e0c16]/94 shadow-[0_20px_50px_rgba(0,0,0,0.45)]"
               >
                 <div className="flex flex-col sm:flex-row">
@@ -308,10 +333,10 @@ export function MatchesExplorer() {
                         </p>
                         <button
                           type="button"
-                          onClick={() => void loadWatch(tmdbId)}
+                          onClick={() => void loadWatch(tmdbId, mediaType)}
                           className="min-h-[36px] rounded-lg border border-[rgba(232,200,106,0.22)] px-3 text-[12px] font-semibold text-[var(--cinema-muted-gold)] hover:bg-[rgba(232,200,106,0.06)]"
                         >
-                          {watchLoading[tmdbId] ? "Loading…" : watch ? "Refresh" : "Show"}
+                          {watchLoading[`${mediaType}:${tmdbId}`] ? "Loading…" : watch ? "Refresh" : "Show"}
                         </button>
                       </div>
 

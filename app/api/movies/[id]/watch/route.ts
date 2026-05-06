@@ -20,8 +20,9 @@ export async function GET(req: Request, ctx: Ctx) {
 
     const u = new URL(req.url);
     const region = (u.searchParams.get("region") ?? "US").toUpperCase().slice(0, 2);
+    const mediaType = (u.searchParams.get("media_type") === "tv" ? "tv" : "movie") as "movie" | "tv";
 
-    const data = await fetchWatchProviders(tmdbId, region);
+    const data = await fetchWatchProviders(tmdbId, region, mediaType);
     return NextResponse.json({ region, ...data });
   } catch (e) {
     return NextResponse.json(

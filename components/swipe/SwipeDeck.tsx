@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useDrag } from "@use-gesture/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { CinemaFilter, MovieSnapshot, SwipeActionDb } from "@/lib/types";
+import type { CinemaFilter, ContentKind, MovieSnapshot, SwipeActionDb } from "@/lib/types";
 import { cn } from "@/lib/cn";
 import { createClient } from "@/lib/supabaseClient";
 import { recordSwipe } from "@/lib/swipes";
@@ -33,6 +33,7 @@ export function SwipeDeck() {
   const [busyIdx, setBusyIdx] = useState(0);
   const [userId, setUserId] = useState<string | null>(null);
   const [cinema, setCinema] = useState<CinemaFilter>("all");
+  const [kind, setKind] = useState<ContentKind>("movie");
 
   useEffect(() => {
     void createClient()
@@ -44,7 +45,9 @@ export function SwipeDeck() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/movies/feed?cinema=${encodeURIComponent(cinema)}`);
+      const res = await fetch(
+        `/api/movies/feed?cinema=${encodeURIComponent(cinema)}&kind=${encodeURIComponent(kind)}`,
+      );
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Failed to load movies");
       setMovies(json.movies ?? []);
@@ -55,7 +58,7 @@ export function SwipeDeck() {
     } finally {
       setLoading(false);
     }
-  }, [cinema]);
+  }, [cinema, kind]);
 
   useEffect(() => {
     /* eslint-disable-next-line react-hooks/set-state-in-effect -- client fetch after mount */
@@ -194,6 +197,20 @@ export function SwipeDeck() {
   return (
     <div className="relative mx-auto flex w-full max-w-md flex-col pb-[calc(8.5rem+env(safe-area-inset-bottom))] md:pb-10">
       <div className="mb-4 panel-ticket p-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
+            Filter by type
+            <select
+              value={kind}
+              onChange={(e) => setKind(e.target.value as ContentKind)}
+              className="field-cinema min-h-[48px] bg-[rgba(5,4,10,0.9)]"
+            >
+              <option value="movie">Movies</option>
+              <option value="tv">TV series</option>
+              <option value="anime">Anime</option>
+            </select>
+          </label>
+
         <label className="flex flex-col gap-2 text-[11px] font-bold uppercase tracking-[0.12em] text-[var(--cinema-muted-gold)] opacity-95">
           Filter by Region
           <select
@@ -210,8 +227,10 @@ export function SwipeDeck() {
             <option value="malayalam">Mollywood (Malayalam)</option>
             <option value="kannada">Sandalwood (Kannada)</option>
             <option value="bengali">Bengali cinema</option>
+            <option value="korean">Korean (KR)</option>
           </select>
         </label>
+        </div>
       </div>
       <div
         {...bind()}

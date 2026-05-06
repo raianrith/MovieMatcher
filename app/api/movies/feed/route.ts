@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { discoverPopularIds, fetchMovieSnapshot } from "@/lib/tmdb";
 import { getSwipedTmdbIds } from "@/lib/swipes";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import type { CinemaFilter } from "@/lib/types";
+import type { CinemaFilter, ContentKind } from "@/lib/types";
 
 function mapCinemaToDiscover(c: CinemaFilter | null) {
   switch (c) {
@@ -22,6 +22,8 @@ function mapCinemaToDiscover(c: CinemaFilter | null) {
       return { originCountry: "IN", originalLanguage: "kn" };
     case "bengali":
       return { originCountry: "IN", originalLanguage: "bn" };
+    case "korean":
+      return { originCountry: "KR", originalLanguage: "ko" };
     default:
       return {};
   }
@@ -40,15 +42,27 @@ export async function GET(req: Request) {
 
     const u = new URL(req.url);
     const cinema = (u.searchParams.get("cinema") as CinemaFilter | null) ?? null;
+    const kind = (u.searchParams.get("kind") as ContentKind | null) ?? "movie";
 
-    const swiped = new Set(await getSwipedTmdbIds(supabase, user.id));
+    const mediaType = kind === "tv" || kind === "anime" ? "tv" : "movie";
+    const swiped = new Set(await getSwipedTmdbIds(supabase, user.id, mediaType));
+
+    const animeExtras =
+      kind === "anime"
+        ? { originCountry: "JP", originalLanguage: "ja", genres: "16" } // Animation
+        : {};
+
     const ids = await discoverPopularIds({
       excludeIds: swiped,
       want: 20,
+      mediaType,
       ...mapCinemaToDiscover(cinema),
+      ...animeExtras,
     });
 
-    const snapshots = await Promise.all(ids.map((id) => fetchMovieSnapshot(id)));
+    const snapshots = await Promise.all(
+      ids.map((id) => fetchMovieSnapshot(id, mediaType)),
+    );
 
     return NextResponse.json({ movies: snapshots });
   } catch (e) {
