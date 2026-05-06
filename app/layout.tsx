@@ -17,6 +17,20 @@ const outfit = Outfit({
 export const metadata: Metadata = {
   title: "Movie Match — shared picks with friends",
   description: "Swipe movies with your crew · mutual likes become your watch-together queue.",
+  manifest: "/manifest.webmanifest",
+  applicationName: "Movie Match",
+  icons: {
+    icon: [
+      { url: "/pwa/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/pwa/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+  },
+  appleWebApp: {
+    title: "Movie Match",
+    statusBarStyle: "black-translucent",
+    capable: true,
+  },
 };
 
 export const viewport: Viewport = {

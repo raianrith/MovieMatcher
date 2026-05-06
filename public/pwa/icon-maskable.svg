@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Movie Match maskable icon">
+  <!-- Maskable icons should keep critical artwork in the center safe area. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c0a12"/>
+      <stop offset="1" stop-color="#161226"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#f5d36d"/>
+      <stop offset="1" stop-color="#caa44a"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#40f3cf"/>
+      <stop offset="1" stop-color="#1aa7a3"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- Center-safe artwork -->
+  <g transform="translate(96 104)">
+    <path
+      d="M26 48c0-18 14-32 32-32h220c18 0 32 14 32 32v176c0 18-14 32-32 32H58c-18 0-32-14-32-32V48Z"
+      fill="rgba(255,255,255,0.04)"
+      stroke="rgba(245,211,109,0.22)"
+      stroke-width="8"
+    />
+    <path
+      d="M96 74h144c12 0 22 10 22 22v86c0 12-10 22-22 22H96c-12 0-22-10-22-22V96c0-12 10-22 22-22Z"
+      fill="rgba(64,243,207,0.08)"
+      stroke="rgba(64,243,207,0.45)"
+      stroke-width="6"
+    />
+    <path d="M112 104h22v80h-22zM208 104h22v80h-22z" fill="url(#gold)"/>
+    <path
+      d="M168 220c34 0 62 18 78 42 6 9-1 22-12 22H102c-11 0-18-13-12-22 16-24 44-42 78-42Z"
+      fill="rgba(255,255,255,0.04)"
+      stroke="rgba(202,164,74,0.35)"
+      stroke-width="6"
+    />
+    <path d="M52 48h252" stroke="rgba(245,211,109,0.12)" stroke-width="8" stroke-linecap="round"/>
+    <path
+      d="M68 284c56 32 136 32 200 0"
+      fill="none"
+      stroke="url(#teal)"
+      stroke-width="10"
+      stroke-linecap="round"
+    />
+  </g>
+</svg>
+

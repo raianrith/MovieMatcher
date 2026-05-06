@@ -1,7 +1,15 @@
 /* Minimal installable shell; extend with workbox if you need offline cards. */
 const CACHE = "movie-match-v3";
 // Only cache the public shell. Do NOT cache authenticated pages like /swipe or /matches.
-const ASSETS = ["/", "/manifest.webmanifest"];
+const ASSETS = [
+  "/",
+  "/manifest.webmanifest",
+  "/pwa/icon.svg",
+  "/pwa/icon-maskable.svg",
+  "/pwa/icon-192.png",
+  "/pwa/icon-512.png",
+  "/apple-touch-icon.png",
+];
 
 self.addEventListener("message", (event) => {
   if (event.data?.type === "SKIP_WAITING") self.skipWaiting();

@@ -1,29 +1,25 @@
 import sharp from "sharp";
 import fs from "node:fs";
+import path from "node:path";
 
 const root = process.cwd();
 
-fs.mkdirSync(`${root}/public/icons`, { recursive: true });
+fs.mkdirSync(`${root}/public/pwa`, { recursive: true });
 
-async function png(size, dest) {
-  const r = Math.round(size * 0.22);
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#eec8cf" />
-      <stop offset="1" stop-color="#664c6f" />
-    </linearGradient>
-  </defs>
-  <rect width="100%" height="100%" rx="${r}" fill="url(#g)" />
-  <circle cx="50%" cy="50%" r="${Math.round(size * 0.18)}" fill="#fcf8f9" opacity="0.92" />
-  <circle cx="${Math.round(size * 0.62)}" cy="${Math.round(size * 0.4)}" r="${Math.round(size * 0.06)}" fill="#cf5b75" opacity="0.95" />
-</svg>`;
-
-  await sharp(Buffer.from(svg)).png().toFile(`${root}/${dest}`);
+function readSvg(relPath) {
+  const abs = path.join(root, relPath);
+  return fs.readFileSync(abs);
 }
 
-await png(512, "public/icons/icon-512.png");
-await png(192, "public/icons/icon-192.png");
-await png(180, "public/apple-touch-icon.png");
+async function renderIcon({ srcSvg, size, destPng, background }){
+  const svg = readSvg(srcSvg);
+  const s = sharp(svg, { density: 512 });
+  const img = background ? s.flatten({ background }) : s;
+  await img.resize(size, size).png({ compressionLevel: 9 }).toFile(path.join(root, destPng));
+}
 
-console.log("Wrote icons to public/icons and public/apple-touch-icon.png");
+await renderIcon({ srcSvg: "public/pwa/icon.svg", size: 512, destPng: "public/pwa/icon-512.png", background: "#0c0a12" });
+await renderIcon({ srcSvg: "public/pwa/icon.svg", size: 192, destPng: "public/pwa/icon-192.png", background: "#0c0a12" });
+await renderIcon({ srcSvg: "public/pwa/icon.svg", size: 180, destPng: "public/apple-touch-icon.png", background: "#0c0a12" });
+
+console.log("Wrote icons to public/pwa and public/apple-touch-icon.png");
