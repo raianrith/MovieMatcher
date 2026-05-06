@@ -4,24 +4,13 @@ import { useEffect } from "react";
 
 export function RegisterSW() {
   useEffect(() => {
+    // Disable SW by default: the PWA shell can otherwise serve stale HTML/redirects
+    // during rapid deploys, which shows the Next “This page couldn't load” overlay.
     if (process.env.NODE_ENV !== "production") return;
     if (!("serviceWorker" in navigator)) return;
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then((reg) => {
-        void reg.update();
-        if (reg.waiting) reg.waiting.postMessage({ type: "SKIP_WAITING" });
-        reg.addEventListener("updatefound", () => {
-          const sw = reg.installing;
-          if (!sw) return;
-          sw.addEventListener("statechange", () => {
-            if (sw.state === "installed" && reg.waiting) {
-              reg.waiting.postMessage({ type: "SKIP_WAITING" });
-            }
-          });
-        });
-      })
-      .catch(() => {});
+    if (process.env.NEXT_PUBLIC_ENABLE_SW !== "true") return;
+
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
   }, []);
   return null;
 }
