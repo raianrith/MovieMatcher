@@ -4,7 +4,9 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 type ProfileMini = Pick<Profile, "id" | "username" | "display_name">;
 
 function friendForRow(row: MatchRowDb, userId: string): string | null {
-  return row.user_a_id === userId ? row.user_b_id : row.user_a_id === userId ? row.user_b_id : null;
+  if (row.user_a_id === userId) return row.user_b_id;
+  if (row.user_b_id === userId) return row.user_a_id;
+  return null;
 }
 
 /** All matches involving the current user, joined with friend's profile + per-user flags. */

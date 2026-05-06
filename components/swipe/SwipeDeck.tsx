@@ -18,10 +18,11 @@ const labels: Record<SwipeActionDb, string> = {
 const SWIPE_DIST = 64;
 const SWIPE_VEL = 0.22;
 
-function mapGestureToAction(mx: number, vx: number, last: boolean): SwipeActionDb | null {
+function mapGestureToAction(mx: number, dx: number, v: number, last: boolean): SwipeActionDb | null {
   if (!last) return null;
-  if (mx >= SWIPE_DIST || vx > SWIPE_VEL) return "liked";
-  if (mx <= -SWIPE_DIST || vx < -SWIPE_VEL) return "disliked";
+  // `velocity` is a magnitude per-axis; use `direction` for sign.
+  if (mx >= SWIPE_DIST || (dx > 0 && v > SWIPE_VEL)) return "liked";
+  if (mx <= -SWIPE_DIST || (dx < 0 && v > SWIPE_VEL)) return "disliked";
   return null;
 }
 
@@ -92,7 +93,7 @@ export function SwipeDeck() {
 
   const cardRef = useRef<HTMLDivElement>(null);
   const bind = useDrag(
-    ({ movement: [mx], velocity: [vx], last, dragging }) => {
+    ({ movement: [mx], direction: [dx], velocity: [vx], last, dragging }) => {
       const el = cardRef.current;
       if (!el || !movie) return;
       if (dragging) {
@@ -101,7 +102,7 @@ export function SwipeDeck() {
         return;
       }
       if (!last) return;
-      const choice = mapGestureToAction(mx, vx, true);
+      const choice = mapGestureToAction(mx, dx, vx, true);
       if (choice === "liked") {
         el.style.transition = "translate 0.22s ease, opacity 0.22s ease";
         el.style.translate = "min(120vw, 480px) 0";
