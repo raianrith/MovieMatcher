@@ -42,26 +42,57 @@ create index if not exists fgm_user_idx on public.friend_group_members (user_id)
 alter table public.friend_groups enable row level security;
 alter table public.friend_group_members enable row level security;
 
+-- Helper functions used by RLS (avoid cross-table recursion).
+create or replace function public.is_group_owner(p_group_id uuid, p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.friend_groups g
+    where g.id = p_group_id
+      and g.owner_id = p_user_id
+  );
+$$;
+
+create or replace function public.is_group_member(p_group_id uuid, p_user_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.friend_group_members m
+    where m.group_id = p_group_id
+      and m.user_id = p_user_id
+  );
+$$;
+
+revoke all on function public.is_group_owner(uuid, uuid) from public;
+revoke all on function public.is_group_member(uuid, uuid) from public;
+grant execute on function public.is_group_owner(uuid, uuid) to authenticated;
+grant execute on function public.is_group_member(uuid, uuid) to authenticated;
+
 -- groups: owner can do anything; members can read
 drop policy if exists fg_owner_all on public.friend_groups;
 create policy fg_owner_all
   on public.friend_groups
   for all
   to authenticated
-  using (owner_id = auth.uid())
-  with check (owner_id = auth.uid());
+  using (public.is_group_owner(id, auth.uid()))
+  with check (public.is_group_owner(id, auth.uid()));
 
 drop policy if exists fg_member_read on public.friend_groups;
 create policy fg_member_read
   on public.friend_groups
   for select
   to authenticated
-  using (
-    exists (
-      select 1 from public.friend_group_members m
-      where m.group_id = id and m.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(id, auth.uid()) or public.is_group_owner(id, auth.uid()));
 
 -- members: owner can manage membership; members can read membership
 drop policy if exists fgm_owner_all on public.friend_group_members;
@@ -69,30 +100,15 @@ create policy fgm_owner_all
   on public.friend_group_members
   for all
   to authenticated
-  using (
-    exists (
-      select 1 from public.friend_groups g
-      where g.id = group_id and g.owner_id = auth.uid()
-    )
-  )
-  with check (
-    exists (
-      select 1 from public.friend_groups g
-      where g.id = group_id and g.owner_id = auth.uid()
-    )
-  );
+  using (public.is_group_owner(group_id, auth.uid()))
+  with check (public.is_group_owner(group_id, auth.uid()));
 
 drop policy if exists fgm_member_read on public.friend_group_members;
 create policy fgm_member_read
   on public.friend_group_members
   for select
   to authenticated
-  using (
-    exists (
-      select 1 from public.friend_group_members m
-      where m.group_id = group_id and m.user_id = auth.uid()
-    )
-  );
+  using (public.is_group_member(group_id, auth.uid()) or public.is_group_owner(group_id, auth.uid()));
 
 -- 3) RPC: group overlaps (everyone liked)
 create or replace function public.group_overlaps(p_group_id uuid, p_media_type text default 'movie')
