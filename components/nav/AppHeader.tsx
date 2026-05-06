@@ -9,7 +9,6 @@ const links = [
   { href: "/groups", label: "Group match" },
   { href: "/friends", label: "Crew" },
   { href: "/requests", label: "Invites" },
-  { href: "/profile", label: "Your seat" },
 ] as const;
 
 export function AppHeader() {

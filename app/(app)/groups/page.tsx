@@ -44,7 +44,13 @@ export default function GroupsPage() {
       setName("");
       setRows((prev) => [g, ...prev]);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Could not create group");
+      const msg =
+        e instanceof Error
+          ? e.message
+          : typeof e === "string"
+            ? e
+            : `Could not create group (${JSON.stringify(e)})`;
+      toast.error(msg);
     }
   };
 

@@ -8,7 +8,6 @@ import {
   IconClapper,
   IconStarBurst,
   IconUsers,
-  IconSeat,
   IconReel,
   IconGroupBadge,
 } from "@/components/nav/NavIcons";
@@ -20,7 +19,6 @@ const items = [
   { href: "/watched", label: "Watched", Icon: IconReel },
   { href: "/groups", label: "Groups", Icon: IconGroupBadge },
   { href: "/friends", label: "Friends", Icon: IconUsers },
-  { href: "/profile", label: "You", Icon: IconSeat },
 ] as const;
 
 export function BottomNav() {

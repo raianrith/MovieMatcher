@@ -9,6 +9,17 @@ alter table public.match_user_state
 
 create index if not exists mus_user_hidden_idx on public.match_user_state (user_id, hidden);
 
+-- Backfill profiles for users created before the profile trigger existed.
+-- Without this, FK inserts into friend_groups/friend_group_members can fail.
+insert into public.profiles (id, username, display_name)
+select
+  u.id,
+  lower(trim(coalesce(u.raw_user_meta_data->>'username', split_part(coalesce(u.email, ''), '@', 1)))) as username,
+  trim(coalesce(nullif(u.raw_user_meta_data->>'display_name', ''), split_part(coalesce(u.email, ''), '@', 1))) as display_name
+from auth.users u
+where not exists (select 1 from public.profiles p where p.id = u.id)
+on conflict (id) do nothing;
+
 -- 2) Friend groups
 create table if not exists public.friend_groups (
   id uuid primary key default gen_random_uuid(),
