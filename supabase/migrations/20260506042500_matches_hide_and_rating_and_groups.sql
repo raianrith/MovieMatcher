@@ -78,14 +78,32 @@ revoke all on function public.is_group_member(uuid, uuid) from public;
 grant execute on function public.is_group_owner(uuid, uuid) to authenticated;
 grant execute on function public.is_group_member(uuid, uuid) to authenticated;
 
--- groups: owner can do anything; members can read
+-- groups: owner can manage; members can read
 drop policy if exists fg_owner_all on public.friend_groups;
-create policy fg_owner_all
+drop policy if exists fg_owner_manage on public.friend_groups;
+drop policy if exists fg_owner_insert on public.friend_groups;
+drop policy if exists fg_owner_update on public.friend_groups;
+drop policy if exists fg_owner_delete on public.friend_groups;
+
+-- Insert must be based on NEW.owner_id, not lookup by id.
+create policy fg_owner_insert
   on public.friend_groups
-  for all
+  for insert
+  to authenticated
+  with check (owner_id = auth.uid());
+
+create policy fg_owner_update
+  on public.friend_groups
+  for update
   to authenticated
   using (public.is_group_owner(id, auth.uid()))
   with check (public.is_group_owner(id, auth.uid()));
+
+create policy fg_owner_delete
+  on public.friend_groups
+  for delete
+  to authenticated
+  using (public.is_group_owner(id, auth.uid()));
 
 drop policy if exists fg_member_read on public.friend_groups;
 create policy fg_member_read
@@ -148,4 +166,32 @@ $$;
 
 revoke all on function public.group_overlaps(uuid, text) from public;
 grant execute on function public.group_overlaps(uuid, text) to authenticated;
+
+-- 4) RPC: create group (avoids INSERT RLS edge cases)
+create or replace function public.create_friend_group(p_name text)
+returns public.friend_groups
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  g public.friend_groups;
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+  if p_name is null or char_length(trim(p_name)) < 1 then
+    raise exception 'enter a group name';
+  end if;
+
+  insert into public.friend_groups (owner_id, name)
+  values (auth.uid(), trim(p_name))
+  returning * into g;
+
+  return g;
+end;
+$$;
+
+revoke all on function public.create_friend_group(text) from public;
+grant execute on function public.create_friend_group(text) to authenticated;
 

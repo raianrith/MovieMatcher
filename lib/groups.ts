@@ -26,11 +26,8 @@ export async function listGroups(supabase: SupabaseClient) {
 export async function createGroup(supabase: SupabaseClient, ownerId: string, name: string) {
   const n = name.trim();
   if (!n) throw new Error("Enter a group name");
-  const { data, error } = await supabase
-    .from("friend_groups")
-    .insert({ owner_id: ownerId, name: n })
-    .select("id, owner_id, name, created_at")
-    .single();
+  // Use SECURITY DEFINER RPC to avoid INSERT RLS edge cases.
+  const { data, error } = await supabase.rpc("create_friend_group", { p_name: n });
   if (error) throw error;
   return data as FriendGroup;
 }
