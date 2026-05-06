@@ -101,7 +101,7 @@ as $$
     select
       s.tmdb_movie_id,
       s.media_type,
-      min(s.movie_snapshot) as movie_snapshot,
+      (jsonb_agg(s.movie_snapshot order by s.created_at desc))[1] as movie_snapshot,
       count(distinct s.user_id)::int as liked_by_count
     from public.swipes s
     join members m on m.user_id = s.user_id
