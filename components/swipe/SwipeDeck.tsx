@@ -9,20 +9,19 @@ import { createClient } from "@/lib/supabaseClient";
 import { recordSwipe } from "@/lib/swipes";
 import { toast } from "sonner";
 
-const labels: Record<SwipeActionDb, string> = {
+const labels: Pick<Record<SwipeActionDb, string>, "liked" | "skipped"> = {
   liked: "Added to your likes!",
-  disliked: "Not this time",
-  skipped: "Skipped",
+  skipped: "Mehhh. Next.",
 };
 
 const SWIPE_DIST = 64;
 const SWIPE_VEL = 0.22;
 
-function mapGestureToAction(mx: number, dx: number, v: number, last: boolean): SwipeActionDb | null {
+function mapGestureToAction(mx: number, dx: number, v: number, last: boolean): "liked" | "skipped" | null {
   if (!last) return null;
   // `velocity` is a magnitude per-axis; use `direction` for sign.
   if (mx >= SWIPE_DIST || (dx > 0 && v > SWIPE_VEL)) return "liked";
-  if (mx <= -SWIPE_DIST || (dx < 0 && v > SWIPE_VEL)) return "disliked";
+  if (mx <= -SWIPE_DIST || (dx < 0 && v > SWIPE_VEL)) return "skipped";
   return null;
 }
 
@@ -120,11 +119,11 @@ export function SwipeDeck() {
         });
         return;
       }
-      if (choice === "disliked") {
+      if (choice === "skipped") {
         el.style.transition = "translate 0.22s ease, opacity 0.22s ease";
         el.style.translate = "max(-120vw, -480px) 0";
         el.style.opacity = "0";
-        void onDecision("disliked").finally(() => {
+        void onDecision("skipped").finally(() => {
           if (cardRef.current === el) {
             el.style.transition = "";
             el.style.translate = "0";
@@ -285,8 +284,8 @@ export function SwipeDeck() {
       </div>
 
       <p className="mt-5 text-center text-[12px] leading-relaxed text-slate-500">
-        Drag the card · <span className="text-[var(--cinema-teal)]">→ like</span> ·{" "}
-        <span className="text-[var(--cinema-ruby)]">← pass</span> — or tap the aisle buttons below.
+        Drag the card · <span className="text-[var(--cinema-teal)]">→ love it</span> ·{" "}
+        <span className="text-slate-300">← mehhh</span> — or tap the buttons below.
       </p>
 
       <div
@@ -295,20 +294,13 @@ export function SwipeDeck() {
           "bottom-[calc(5.75rem+env(safe-area-inset-bottom))] md:pointer-events-auto md:relative md:bottom-auto md:z-0 md:mt-7 md:flex md:justify-center md:pb-0",
         )}
       >
-        <div className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-3 gap-3">
-          <button
-            type="button"
-            onClick={() => void onDecision("disliked")}
-            className="min-h-[52px] rounded-2xl border border-[rgba(180,74,92,0.35)] bg-[rgba(40,14,22,0.25)] py-4 text-[13px] font-bold text-rose-100 active:scale-[0.98]"
-          >
-            Pass
-          </button>
+        <div className="pointer-events-auto mx-auto grid w-full max-w-md grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => void onDecision("skipped")}
             className="min-h-[52px] rounded-2xl border border-[rgba(148,134,170,0.28)] bg-[rgba(12,10,20,0.6)] py-4 text-[13px] font-bold text-slate-300 active:scale-[0.98]"
           >
-            Skip
+            Mehhh
           </button>
           <button
             type="button"

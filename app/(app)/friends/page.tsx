@@ -1,11 +1,27 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import { PageHeading } from "@/components/layout/PageHeading";
 import { createClient } from "@/lib/supabaseClient";
 import { getFriends, removeFriendBothSides, searchProfilesByUsername, sendFriendRequest } from "@/lib/friends";
 import { toast } from "sonner";
+
+function AvatarCircle(props: { url?: string | null; label: string }) {
+  const { url, label } = props;
+  return (
+    <div className="relative h-11 w-11 overflow-hidden rounded-full border border-[rgba(232,200,106,0.16)] bg-[rgba(8,6,14,0.55)]">
+      {url ? (
+        <Image src={url} alt="" fill sizes="44px" className="object-cover" draggable={false} />
+      ) : (
+        <div className="grid h-full w-full place-items-center text-[12px] font-bold text-[var(--cinema-muted-gold)]">
+          {label.slice(0, 1).toUpperCase()}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function FriendsPage() {
   const supabase = createClient();
@@ -106,12 +122,13 @@ export default function FriendsPage() {
           </button>
         </div>
         {results.length > 0 ? (
-          <ul className="mt-6 divide-y divide-[rgba(148,134,170,0.12)] rounded-xl border border-[rgba(148,134,170,0.1)] bg-[rgba(5,4,10,0.45)]">
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {results.map((r) => (
-              <li key={r.id} className="flex flex-wrap items-center gap-4 px-4 py-4">
+              <li key={r.id} className="panel-ticket flex items-center gap-4 p-4">
+                <AvatarCircle url={r.avatar_url} label={r.username} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-semibold text-white">@{r.username}</p>
-                  <p className="truncate text-[13px] text-slate-500">{r.display_name}</p>
+                  <p className="truncate font-semibold text-white">@{r.username}</p>
+                  <p className="truncate text-[13px] text-slate-500">{r.display_name ?? "—"}</p>
                 </div>
                 <button
                   type="button"
@@ -127,7 +144,15 @@ export default function FriendsPage() {
       </div>
 
       <section>
-        <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Friends seated</h2>
+        <div className="flex items-baseline justify-between gap-3">
+          <h2 className="text-[11px] font-bold uppercase tracking-[0.2em] text-slate-500">Friends seated</h2>
+          <Link
+            href="/settings"
+            className="text-[12px] font-semibold text-[var(--cinema-muted-gold)] hover:underline underline-offset-4"
+          >
+            Set avatar →
+          </Link>
+        </div>
         {loading ? (
           <p className="mt-6 text-slate-500">Rolling credits…</p>
         ) : friends.length === 0 ? (
@@ -135,20 +160,34 @@ export default function FriendsPage() {
             No friends yet. Search above and tap <strong className="text-slate-200">Invite</strong>.
           </p>
         ) : (
-          <ul className="mt-4 divide-y divide-[rgba(148,134,170,0.08)] overflow-hidden rounded-2xl border border-[rgba(232,200,106,0.12)] bg-[rgba(18,14,26,0.55)]">
+          <ul className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {friends.map((f) => (
-              <li key={f.id} className="flex items-center gap-4 px-4 py-5">
-                <div className="min-w-0 flex-1">
-                  <p className="truncate font-semibold text-white">{f.display_name ?? f.username}</p>
-                  <p className="text-[13px] text-slate-500">@{f.username}</p>
+              <li key={f.id} className="panel-ticket p-5">
+                <div className="flex items-start gap-4">
+                  <AvatarCircle url={f.avatar_url} label={f.username} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-white">{f.display_name ?? f.username}</p>
+                    <p className="mt-0.5 text-[13px] text-slate-500">@{f.username}</p>
+                    <p className="mt-3 text-[12px] text-slate-400">
+                      When you both hit <span className="font-semibold text-slate-200">Love it</span>, it lands in Double features.
+                    </p>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => void onRemove(f.id)}
-                  className="min-h-[44px] shrink-0 text-[13px] font-semibold text-rose-300 underline-offset-2 hover:underline"
-                >
-                  Remove
-                </button>
+                <div className="mt-4 flex items-center justify-between gap-3">
+                  <Link
+                    href={`/matches?friend=${encodeURIComponent(f.id)}`}
+                    className="text-[12px] font-semibold text-[var(--cinema-muted-gold)] hover:underline underline-offset-4"
+                  >
+                    View overlaps →
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => void onRemove(f.id)}
+                    className="min-h-[40px] rounded-xl border border-[rgba(180,74,92,0.35)] bg-[rgba(40,14,22,0.22)] px-4 text-[12px] font-semibold text-rose-200 hover:bg-[rgba(40,14,22,0.35)]"
+                  >
+                    Remove
+                  </button>
+                </div>
               </li>
             ))}
           </ul>

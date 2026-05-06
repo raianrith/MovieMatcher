@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { PageHeading } from "@/components/layout/PageHeading";
@@ -102,6 +103,14 @@ export default function GroupDetailPage() {
 
   return (
     <div className="space-y-10">
+      <div>
+        <Link
+          href="/groups"
+          className="inline-flex min-h-[40px] items-center gap-2 rounded-xl border border-[rgba(232,200,106,0.14)] bg-[rgba(8,6,14,0.45)] px-4 text-[13px] font-semibold text-[var(--cinema-muted-gold)] hover:bg-[rgba(232,200,106,0.06)]"
+        >
+          ← Back to Groups
+        </Link>
+      </div>
       <PageHeading
         eyebrow="Group match"
         title="EVERYONE LIKED"

@@ -54,6 +54,18 @@ export default function GroupsPage() {
     }
   };
 
+  const onDelete = async (groupId: string, groupName: string) => {
+    if (!confirm(`Delete “${groupName}”? This removes the group for everyone in it.`)) return;
+    try {
+      const { error } = await supabase.from("friend_groups").delete().eq("id", groupId);
+      if (error) throw error;
+      toast.success("Group deleted.");
+      setRows((prev) => prev.filter((g) => g.id !== groupId));
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Could not delete group");
+    }
+  };
+
   return (
     <div className="space-y-10">
       <PageHeading
@@ -105,15 +117,26 @@ export default function GroupsPage() {
                       {g.owner_id === me ? "You’re the director." : "You’re in the cast."}
                     </p>
                   </div>
-                  <Link
-                    href={`/groups/${g.id}`}
-                    className={cn(
-                      "shrink-0 rounded-lg border border-[rgba(232,200,106,0.18)] px-3 py-2 text-[12px] font-semibold",
-                      "text-[var(--cinema-muted-gold)] hover:bg-[rgba(232,200,106,0.08)]",
-                    )}
-                  >
-                    Open
-                  </Link>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {g.owner_id === me ? (
+                      <button
+                        type="button"
+                        onClick={() => void onDelete(g.id, g.name)}
+                        className="min-h-[36px] rounded-lg border border-[rgba(180,74,92,0.35)] bg-[rgba(40,14,22,0.25)] px-3 text-[12px] font-semibold text-rose-200 hover:bg-[rgba(40,14,22,0.4)]"
+                      >
+                        Delete
+                      </button>
+                    ) : null}
+                    <Link
+                      href={`/groups/${g.id}`}
+                      className={cn(
+                        "shrink-0 rounded-lg border border-[rgba(232,200,106,0.18)] px-3 py-2 text-[12px] font-semibold",
+                        "text-[var(--cinema-muted-gold)] hover:bg-[rgba(232,200,106,0.08)]",
+                      )}
+                    >
+                      Open
+                    </Link>
+                  </div>
                 </div>
               </li>
             ))}
