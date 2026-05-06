@@ -93,54 +93,72 @@ export default async function DashboardPage() {
       </div>
 
       <section className="panel-ticket p-6">
-        <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--cinema-muted-gold)] opacity-95">
-          Download the app
-        </p>
-        <h2 className="mt-2 font-[family-name:var(--font-display)] text-2xl tracking-[0.04em] text-white">
-          INSTALL MOVIEMATCH
-        </h2>
-        <p className="mt-2 text-[13px] text-slate-400">
-          MovieMatch is a web app you can install on your phone like a native app (no App Store needed).
-        </p>
-
-        <div className="mt-5 grid gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] p-4">
-            <p className="text-[12px] font-semibold text-slate-200">iPhone (iOS)</p>
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[13px] text-slate-400">
-              <li>Open MovieMatch in Safari</li>
-              <li>Tap Share</li>
-              <li>Tap “Add to Home Screen”</li>
-              <li>Tap Add</li>
-            </ol>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0">
+            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[var(--cinema-muted-gold)] opacity-95">
+              Box office
+            </p>
+            <h2 className="mt-2 font-[family-name:var(--font-display)] text-3xl tracking-[0.05em] text-white">
+              INSTALL MOVIEMATCH
+            </h2>
+            <p className="mt-2 max-w-[58ch] text-[13px] text-slate-400">
+              Add MovieMatch to your home screen — it launches full-screen like a real app (no App Store needed).
+            </p>
           </div>
-          <div className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] p-4">
-            <p className="text-[12px] font-semibold text-slate-200">Android</p>
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[13px] text-slate-400">
-              <li>Open MovieMatch in Chrome</li>
-              <li>Tap the ⋮ menu</li>
-              <li>Tap “Install app”</li>
-            </ol>
-          </div>
-          <div className="rounded-xl border border-[rgba(148,134,170,0.12)] bg-[rgba(8,6,14,0.55)] p-4">
-            <p className="text-[12px] font-semibold text-slate-200">Desktop</p>
-            <ol className="mt-2 list-decimal space-y-1 pl-4 text-[13px] text-slate-400">
-              <li>Open MovieMatch in Chrome / Edge</li>
-              <li>Click the install icon in the address bar</li>
-              <li>Confirm Install</li>
-            </ol>
+          <div className="shrink-0 rounded-2xl border border-[rgba(61,212,192,0.18)] bg-[rgba(61,212,192,0.08)] px-4 py-3">
+            <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[var(--cinema-teal)]">Best experience</p>
+            <p className="mt-1 text-[12px] text-slate-300">Install + keep logged in</p>
           </div>
         </div>
 
-        <details className="mt-4 rounded-xl border border-[rgba(232,200,106,0.12)] bg-[rgba(12,10,18,0.45)] px-4 py-3">
+        <div className="mt-5 marquee-rule" />
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-3">
+          {[
+            {
+              title: "iPhone (iOS)",
+              steps: ["Open in Safari", "Tap Share", "Add to Home Screen", "Tap Add"],
+              accent: "rgba(232,200,106,0.18)",
+            },
+            {
+              title: "Android",
+              steps: ["Open in Chrome", "Tap ⋮ menu", "Install app"],
+              accent: "rgba(61,212,192,0.22)",
+            },
+            {
+              title: "Desktop",
+              steps: ["Open in Chrome / Edge", "Click install icon in address bar", "Confirm Install"],
+              accent: "rgba(148,134,170,0.18)",
+            },
+          ].map((card) => (
+            <div
+              key={card.title}
+              className="rounded-2xl border border-[rgba(148,134,170,0.14)] bg-[rgba(8,6,14,0.55)] p-5 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]"
+              style={{ borderColor: card.accent }}
+            >
+              <p className="text-[12px] font-semibold text-slate-200">{card.title}</p>
+              <ol className="mt-3 space-y-2 text-[13px] text-slate-300">
+                {card.steps.map((s, idx) => (
+                  <li key={s} className="flex items-start gap-2.5">
+                    <span className="mt-0.5 grid h-5 w-5 place-items-center rounded-full border border-[rgba(232,200,106,0.24)] bg-[rgba(12,10,18,0.55)] text-[11px] font-bold text-[var(--cinema-muted-gold)]">
+                      {idx + 1}
+                    </span>
+                    <span className="leading-snug text-slate-300">{s}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
+
+        <details className="mt-4 rounded-2xl border border-[rgba(232,200,106,0.12)] bg-[rgba(12,10,18,0.45)] px-5 py-4">
           <summary className="cursor-pointer text-[13px] font-semibold text-slate-200">
-            Don’t see “Install”?
+            Trouble finding “Install”?
           </summary>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-[13px] text-slate-400">
+          <ul className="mt-3 list-disc space-y-1.5 pl-5 text-[13px] text-slate-400">
             <li>Make sure you’re on the live HTTPS site (not localhost).</li>
-            <li>On iPhone, it must be Safari (not Chrome).</li>
-            <li>
-              If it still doesn’t show up, clear site data once and reload.
-            </li>
+            <li>On iPhone, it must be Safari.</li>
+            <li>If it still won’t show, clear site data once and reload.</li>
           </ul>
         </details>
       </section>
