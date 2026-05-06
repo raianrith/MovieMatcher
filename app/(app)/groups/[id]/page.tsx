@@ -22,6 +22,9 @@ export default function GroupDetailPage() {
   const [me, setMe] = useState<string | null>(null);
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [friends, setFriends] = useState<{ id: string; username: string; display_name: string | null }[]>([]);
+  const [memberProfiles, setMemberProfiles] = useState<Record<string, { username: string; display_name: string | null }>>(
+    {},
+  );
   const [addId, setAddId] = useState("");
   const [kind, setKind] = useState<"movie" | "tv">("movie");
   const [loading, setLoading] = useState(true);
@@ -36,7 +39,25 @@ export default function GroupDetailPage() {
     setLoading(true);
     try {
       const members = await listGroupMembers(supabase, groupId);
-      setMemberIds(members.map((m) => m.user_id));
+      const mids = members.map((m) => m.user_id);
+      setMemberIds(mids);
+
+      if (mids.length) {
+        const { data: ps, error: pe } = await supabase
+          .from("profiles")
+          .select("id, username, display_name")
+          .in("id", mids);
+        if (pe) throw pe;
+        setMemberProfiles(
+          Object.fromEntries((ps ?? []).map((p: { id: string; username: string; display_name: string | null }) => [
+            p.id,
+            { username: p.username, display_name: p.display_name },
+          ])),
+        );
+      } else {
+        setMemberProfiles({});
+      }
+
       setFriends((await getFriends(supabase, uid)).map((f) => ({ id: f.id, username: f.username, display_name: f.display_name })));
       const rows = await groupOverlaps(supabase, groupId, kind);
       setOverlaps(rows.map((r) => ({ tmdb_movie_id: r.tmdb_movie_id, media_type: r.media_type, movie_snapshot: r.movie_snapshot })));
@@ -122,7 +143,7 @@ export default function GroupDetailPage() {
               className="rounded-full border border-[rgba(232,200,106,0.14)] bg-[rgba(8,7,14,0.55)] px-3 py-1.5 text-[12px] font-semibold text-slate-300 disabled:opacity-40"
               title={uid === me ? "You can’t remove yourself" : "Remove from group"}
             >
-              {uid === me ? "You" : uid.slice(0, 8)} ×
+              {uid === me ? "You" : memberProfiles[uid]?.username ? `@${memberProfiles[uid]!.username}` : uid.slice(0, 8)} ×
             </button>
           ))}
         </div>
