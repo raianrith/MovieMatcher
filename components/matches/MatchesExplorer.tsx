@@ -21,6 +21,17 @@ function groupByMovie(rows: MatchWithFriend[]) {
 
 const selectClass = "field-cinema block w-full min-h-[48px] py-2.5 text-[15px] text-slate-100 bg-[rgba(5,4,10,0.9)]";
 
+function formatDateTime(value: string) {
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return value;
+  try {
+    // `timeStyle` is not valid for `toLocaleDateString` — use `toLocaleString`.
+    return d.toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+  } catch {
+    return d.toISOString();
+  }
+}
+
 export function MatchesExplorer() {
   const supabase = createClient();
   const [rows, setRows] = useState<MatchWithFriend[]>([]);
@@ -254,10 +265,7 @@ export function MatchesExplorer() {
                                 @{m.friendUsername ?? "?"}
                               </span>
                               <span className="text-[12px] text-slate-600">
-                                {new Date(m.created_at).toLocaleDateString(undefined, {
-                                  dateStyle: "medium",
-                                  timeStyle: "short",
-                                })}
+                                {formatDateTime(m.created_at)}
                               </span>
                             </div>
                             <div className="mt-4 flex flex-wrap gap-3">
