@@ -33,7 +33,8 @@ export function AppHeader() {
   return (
     <header className="pt-[env(safe-area-inset-top)]">
       <div className="border-b border-[rgba(232,200,106,0.10)] bg-[#0c0a12]/70 backdrop-blur-xl">
-        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 md:gap-6">
+        {/* Reserve space on the right so content doesn't sit under the fixed gear button. */}
+        <div className="mx-auto flex max-w-5xl items-center gap-3 px-4 py-3 pr-[calc(4rem+env(safe-area-inset-right))] md:gap-6 md:pr-4">
           <Link
             href="/dashboard"
             className="shrink-0 font-[family-name:var(--font-display)] text-2xl tracking-[0.06em] text-white"
@@ -42,7 +43,8 @@ export function AppHeader() {
             <span className="ml-1.5 text-white">MATCH</span>
           </Link>
 
-          <div className="ml-2 hidden items-center gap-2 md:flex">
+          {/* Profile chip (show on mobile + desktop) */}
+          <div className="ml-auto flex items-center gap-2">
             <div className="relative h-8 w-8 overflow-hidden rounded-full border border-[rgba(232,200,106,0.16)] bg-[rgba(8,6,14,0.55)]">
               {avatarUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -59,7 +61,9 @@ export function AppHeader() {
                 </div>
               )}
             </div>
-            <p className="text-[13px] font-semibold text-slate-300">{handle ?? "—"}</p>
+            <p className="max-w-[42vw] truncate text-[13px] font-semibold text-slate-300 md:max-w-none">
+              {handle ?? "—"}
+            </p>
           </div>
 
           <nav className="hidden flex-1 flex-wrap justify-center gap-1 md:flex md:gap-0.5 lg:gap-2">
